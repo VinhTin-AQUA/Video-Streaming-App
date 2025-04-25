@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { VideoMetadataRepository } from './repositories/video-metadata.repository';
+import { RpcException } from '@nestjs/microservices';
+import { Types } from 'mongoose';
+
 
 @Injectable()
 export class VideoMetadataService {
@@ -8,16 +11,20 @@ export class VideoMetadataService {
     async addVideoMetadata(
         model: AddVideoMetadataRequest,
     ): Promise<VideoMetadata> {
-        const r = await this.videoMetadataRepository.addVideoMetada(model);
+        const r = await this.videoMetadataRepository.addVideoMetada({
+            ...model,
+            status: '',
+        });
         return {
             id: r._id.toString(),
             artist: r.artist,
             desciption: r.desciption,
             duration: r.duration,
             filename: r.filename,
-            format_name: r.format_name,
+            formatname: r.formatname,
             size: r.size,
             title: r.title,
+            status: r.status,
         };
     }
 
@@ -30,13 +37,40 @@ export class VideoMetadataService {
                 desciption: v.desciption,
                 duration: v.duration,
                 filename: v.filename,
-                format_name: v.format_name,
+                formatname: v.formatname,
                 size: v.size,
                 title: v.title,
             };
         }) as VideoMetadata[];
         return {
             videoMetadatas: response,
+        };
+    }
+
+    async updateVideoMetadata(
+        model: UpdateVideoMetadataRequest,
+    ): Promise<VideoMetadata> {
+        const r = await this.videoMetadataRepository.findOneAndUpdate(
+            { _id: new Types.ObjectId("680b90f15dbf171a167799e5") },
+            model,
+        );
+
+        if (!r) {
+            throw new RpcException({
+                code: 5, // mã lỗi gRPC
+                message: 'Không tìm thấy video',
+            });
+        }
+        return {
+            artist: r.artist,
+            desciption: r.desciption,
+            duration: r.duration,
+            filename: r.filename,
+            formatname: r.formatname,
+            id: r._id.toString(),
+            size: r.size,
+            status: r.status,
+            title: r.title,
         };
     }
 }

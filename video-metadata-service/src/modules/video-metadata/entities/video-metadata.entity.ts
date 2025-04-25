@@ -16,7 +16,7 @@ export class VideoMetadata {
     filename: string;
 
     @Prop()
-    format_name: string;
+    formatname: string;
 
     @Prop({ type: Number })
     duration: number;
@@ -26,6 +26,9 @@ export class VideoMetadata {
 
     @Prop()
     artist: string;
+    
+    @Prop()
+    status: string;
 }
 
 export type VideoMetadataDocument = HydratedDocument<VideoMetadata>;

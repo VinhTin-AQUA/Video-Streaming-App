@@ -17,4 +17,11 @@ export class VideoMetadataController {
         const r = await this.videoMetadataService.getAllMetadata();
         return r;
     }
+
+    
+    @GrpcMethod('VideoMetadataGRPC', 'UpdateVideoMetadata')
+    async updateVideoMetadata(model: UpdateVideoMetadataRequest) {
+        const r = await this.videoMetadataService.updateVideoMetadata(model);
+        return r;
+    }
 }
