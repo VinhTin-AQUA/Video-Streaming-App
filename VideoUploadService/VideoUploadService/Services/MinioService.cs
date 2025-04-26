@@ -1,6 +1,8 @@
 ﻿using Minio.DataModel.Args;
 using Minio;
 using VideoUploadService.Contants;
+using Minio.DataModel;
+using Grpc.Core;
 
 namespace VideoUploadService.Services
 {
@@ -62,6 +64,96 @@ namespace VideoUploadService.Services
             }
 
             return actualChunks == expectedChunks;
+        }
+
+        public async Task<bool> ComebineChunks(string uploadId, string bucketName, string finalObjectName)
+        {
+            // Kiểm tra bucket tồn tại
+            bool found = await minioClient.BucketExistsAsync(
+                new BucketExistsArgs().WithBucket(bucketName)
+            );
+
+            if (!found)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, $"Bucket {bucketName} không tồn tại"));
+            }
+
+            // Lấy danh sách các chunks
+            var listArgs = new ListObjectsArgs()
+                .WithBucket(bucketName)
+                .WithPrefix($"{uploadId}/")
+                .WithRecursive(true);
+
+            var chunks = new List<Item>();
+            var observable = minioClient.ListObjectsEnumAsync(listArgs);
+
+            await foreach (var item in observable)
+            {
+                chunks.Add(item);
+            }
+
+            // Sắp xếp các chunks theo thứ tự
+            chunks = chunks.OrderBy(c => c.Key).ToList();
+
+            // Tạo một file tạm để hợp nhất
+            var tempFile = Path.GetTempFileName();
+
+            try
+            {
+                using (var tempStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
+                {
+                    // Tải từng chunk và ghi vào file tạm
+                    foreach (var chunk in chunks)
+                    {
+                        var getArgs = new GetObjectArgs()
+                            .WithBucket(bucketName)
+                            .WithObject(chunk.Key)
+                            .WithCallbackStream(stream =>
+                            {
+                                stream.CopyTo(tempStream);
+                            });
+
+                        await minioClient.GetObjectAsync(getArgs);
+                    }
+                }
+
+                // Tải file tạm lên MinIO như object cuối cùng
+                using (var fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Read))
+                {
+                    var putArgs = new PutObjectArgs()
+                        .WithBucket(bucketName)
+                        .WithObject($"{uploadId}/{finalObjectName}")
+                        .WithStreamData(fileStream)
+                        .WithObjectSize(fileStream.Length)
+                        .WithContentType("application/octet-stream");
+
+                    await minioClient.PutObjectAsync(putArgs);
+                }
+
+                // Xóa các chunks sau khi hợp nhất thành công
+                foreach (var chunk in chunks)
+                {
+                    var removeArgs = new RemoveObjectArgs()
+                        .WithBucket(bucketName)
+                        .WithObject(chunk.Key);
+
+                    await minioClient.RemoveObjectAsync(removeArgs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, ex.Message));
+            }
+            finally
+            {
+                // Xóa file tạm
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
+                }
+            }
+            return true;
         }
     }
 }

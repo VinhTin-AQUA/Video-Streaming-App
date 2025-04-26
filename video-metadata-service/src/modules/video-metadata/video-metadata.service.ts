@@ -51,7 +51,7 @@ export class VideoMetadataService {
         model: UpdateVideoMetadataRequest,
     ): Promise<VideoMetadata> {
         const r = await this.videoMetadataRepository.findOneAndUpdate(
-            { _id: new Types.ObjectId("680b90f15dbf171a167799e5") },
+            { _id: new Types.ObjectId(model.id) },
             model,
         );
 

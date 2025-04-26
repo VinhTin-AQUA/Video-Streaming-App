@@ -54,7 +54,7 @@ namespace VideoUploadService.Services
 
         public override async Task<CompleteUploadResponse> CompleteUpload(CompleteUploadRequest request, ServerCallContext context)
         {
-            // 1. Verify all chunks exist in MinIO
+            // Verify all chunks exist in MinIO
             bool allChunksUploaded = await minio.VerifyChunks(
                 request.UploadId,
                 request.ChunkChecksums.Count,
@@ -69,22 +69,25 @@ namespace VideoUploadService.Services
                 ));
             }
 
-            // 2. Publish to Kafka để xử lý encoding
-            var message = new
-            {
-                VideoId = request.UploadId,
-                Checksums = request.ChunkChecksums
-            };
-            await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS, message);
-
-            // 3. Cập nhật Metadata
-            await videoMetadataClient.UpdateVideoMetadata(
+            // Cập nhật Metadata
+            var metadata = await videoMetadataClient.UpdateVideoMetadata(
                new UpdateVideoMetadataRequest
                {
                    Id = request.UploadId,
                    Status = "processing"
                }
             );
+
+            // hợp nhất các chunks thành file gốc
+            await minio.ComebineChunks(request.UploadId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Filename);
+
+            // Publish to Kafka để xử lý encoding
+            var message = new
+            {
+                VideoId = request.UploadId,
+                Checksums = request.ChunkChecksums
+            };
+            await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS, message);
 
             return new CompleteUploadResponse
             {

@@ -5,7 +5,7 @@ services:
 
   minio:
     image: docker.io/bitnami/minio:latest
-    container_name: MinIO-Aloper
+    container_name: MinIO
     ports:
       - '8000:9000'
       - '8001:9001'

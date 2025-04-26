@@ -2,9 +2,6 @@ syntax = "proto3";
 
 option csharp_namespace = "VideoUploadService";
 
-import "google/protobuf/timestamp.proto";
-// import "video-metadata.proto";
-
 service VideoUploadGrpc {
   rpc InitUpload (InitUploadRequest) returns (InitUploadResponse);
   rpc CompleteUpload (CompleteUploadRequest) returns (CompleteUploadResponse);
@@ -14,8 +11,8 @@ message InitUploadRequest {
     string userId = 1;
     string title = 2;
     string desciption = 3;
-    string filename = 4;
-    string format_name = 5;
+    string fileName = 4;
+    string formatName = 5;
     float duration = 6;
     int64 size = 7;
     string artist = 8;
@@ -23,7 +20,7 @@ message InitUploadRequest {
 
 message InitUploadResponse {
   string uploadId = 1;
-  repeated string chunk_urls = 2; // Pre-signed URLs cho từng chunk
+  repeated string chunkUrls = 2; // Pre-signed URLs cho từng chunk
 }
 
 message CompleteUploadRequest {
