@@ -3,6 +3,10 @@ using Minio;
 using VideoUploadService.Contants;
 using Minio.DataModel;
 using Grpc.Core;
+using Minio.ApiEndpoints;
+using System.Security.Cryptography;
+using VideoUploadService.Utils;
+using System.IO;
 
 namespace VideoUploadService.Services
 {
@@ -36,34 +40,59 @@ namespace VideoUploadService.Services
             return signedUrl;
         }
 
-        public async Task<bool> VerifyChunks(string uploadId, int expectedChunks, string bucketName)
+        public async Task<bool> VerifyChunks(string uploadId, List<string> expectedChunks, string bucketName)
         {
+            if (expectedChunks == null || expectedChunks.Count == 0)
+                return false;
+
             var args = new ListObjectsArgs()
                 .WithBucket(bucketName)
                 .WithPrefix($"{uploadId}/chunk-");
 
-            int actualChunks = 0;
+            var actualChunks = new Dictionary<int, string>(); // Key: chunk number, Value: SHA256 hash
             var observable = minioClient.ListObjectsEnumAsync(args);
 
-            var cancellationToken = new CancellationTokenSource();
-            try
+           
+            await foreach (var item in observable)
             {
-                await foreach (var item in observable.WithCancellation(cancellationToken.Token))
-                {
-                    actualChunks++;
-                    if (actualChunks >= expectedChunks)
+                // Extract chunk number from object name (assuming format "uploadId/chunk-0001")
+                var chunkNumberStr = item.Key.Split('-').Last();
+                if (!int.TryParse(chunkNumberStr, out var chunkNumber))
+                    continue;
+
+                // Get the chunk object from MinIO
+                var getArgs = new GetObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(item.Key)
+                    .WithCallbackStream(stream =>
                     {
-                        cancellationToken.Cancel(); // Dừng sớm nếu đủ chunks
-                        break;
-                    }
+                        using (stream)
+                        using (var sha256 = SHA256.Create())
+                        {
+                            var hashBytes = sha256.ComputeHash(stream);
+                            var hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+                            actualChunks[chunkNumber] = hashString;
+                        }
+                    });
+
+                await minioClient.GetObjectAsync(getArgs);
+            }
+            
+            // Verify all chunks
+            if (actualChunks.Count != expectedChunks.Count)
+                return false;
+
+            for (int i = 0; i < expectedChunks.Count; i++)
+            {
+                // Chunks are expected to be in order (chunk-0001, chunk-0002, etc.)
+                if (!actualChunks.TryGetValue(i, out var actualHash) ||
+                    !string.Equals(actualHash, expectedChunks[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
                 }
             }
-            catch (OperationCanceledException)
-            {
-                // Expected khi hủy sớm
-            }
 
-            return actualChunks == expectedChunks;
+            return true;
         }
 
         public async Task<bool> ComebineChunks(string uploadId, string bucketName, string finalObjectName)

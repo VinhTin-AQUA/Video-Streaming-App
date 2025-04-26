@@ -57,7 +57,7 @@ namespace VideoUploadService.Services
             // Verify all chunks exist in MinIO
             bool allChunksUploaded = await minio.VerifyChunks(
                 request.UploadId,
-                request.ChunkChecksums.Count,
+                request.ChunkChecksums.Select(chunk => chunk).ToList(),
                 MinIOContants.RAW_VIDEOS_BUCKET_NAME
             );
 
