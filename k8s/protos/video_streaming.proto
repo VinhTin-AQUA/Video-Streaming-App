@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "StreamingService";
+
+package videostreaming;
+
+service VideoStreaming {
+  rpc GetDashManifest (GetDashManifestRequest) returns (GetDashManifestResponse);
+}
+
+message GetDashManifestRequest {
+  string video_id = 1;
+}
+
+message GetDashManifestResponse {
+  string manifest_content = 1;
+  string content_type = 2;
+}

@@ -36,7 +36,7 @@ namespace TranscodingService.Services
             Directory.CreateDirectory(outputDir);
 
             // Sửa lại cách đặt dấu ngoặc kép cho output path
-            var outputPath = Path.Combine(outputDir, "master.mpd");
+            var outputPath = Path.Combine(outputDir, "manifest.mpd");
             var quotedOutputPath = $"\"{outputPath}\"";
 
             var process = new Process
