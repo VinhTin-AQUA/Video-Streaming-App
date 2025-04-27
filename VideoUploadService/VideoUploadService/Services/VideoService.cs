@@ -85,9 +85,10 @@ namespace VideoUploadService.Services
             var message = new
             {
                 VideoId = request.UploadId,
-                Checksums = request.ChunkChecksums
+                Checksums = request.ChunkChecksums,
+                FileName = $"{metadata.Filename}" 
             };
-            await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS, message);
+            await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS_TOPIC, message);
 
             return new CompleteUploadResponse
             {

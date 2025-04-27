@@ -1,4 +1,4 @@
-﻿namespace VideoUploadService.Contants
+﻿namespace TranscodingService.Contants
 {
     public static class KafakaContants
     {
