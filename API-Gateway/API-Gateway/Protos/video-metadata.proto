@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package videometadata;
+
+service VideoMetadataGRPC {
+    rpc AddVideoMetadata(AddVideoMetadataRequest) returns (VideoMetadata);
+    rpc GetAllVideoMetadata(Empty) returns (GetAllVideoMetadataResponse);
+    rpc UpdateVideoMetadata(UpdateVideoMetadataRequest) returns (VideoMetadata);
+}
+  
+message Empty {}
+
+message VideoMetadata {
+    string id = 1;
+    string title = 2;
+    string desciption = 3;
+    string filename = 4;
+    string format_name = 5;
+    float duration = 6;
+    int64 size = 7;
+    string artist = 8;
+    string status = 9;
+}
+
+message AddVideoMetadataRequest {
+    string title = 1;
+    string desciption = 2;
+    string filename = 3;
+    string formatname = 4;
+    float duration = 5;
+    int64 size = 6;
+    string artist = 7;
+}
+
+
+message GetAllVideoMetadataResponse {
+    repeated VideoMetadata videoMetadatas = 1;
+}
+
+message UpdateVideoMetadataRequest {
+    string id = 1;
+    string status = 2;
+}

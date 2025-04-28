@@ -6,7 +6,7 @@ export class AuthAccount {
     @Prop({ type: SchemaTypes.ObjectId, auto: true })
     _id: Types.ObjectId;
 
-    @Prop()
+    @Prop({ unique: true })
     email: string;
 
     @Prop()

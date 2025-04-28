@@ -5,6 +5,7 @@ import { RpcException } from '@nestjs/microservices';
 import { compare, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { GrpcStatusCode } from 'src/common/exceptions/rpc-status-code';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,17 @@ export class AuthService {
     ) {}
 
     async register(model: RegisterRequest): Promise<RegisterResponse> {
+        const accountExists = await this.authAccountRepository.findOneByQuery({
+            email: model.email,
+        });
+
+        if(accountExists) {
+            throw new RpcException({
+                code: GrpcStatusCode.INVALID_ARGUMENT,
+                message: 'Email này đã được sử dụng. Vui lòng sử dụng email khác.',
+            })
+        }
+
         const account: Omit<AuthAccount, '_id'> = {
             email: model.email,
             password: await hash(model.password, 10),
@@ -40,7 +52,7 @@ export class AuthService {
 
         if (!account) {
             throw new RpcException({
-                code: 16,
+                code: GrpcStatusCode.INVALID_ARGUMENT,
                 message: 'Tài khoản hoặc mật khẩu không chính xác',
                 error: '',
             });
@@ -49,7 +61,7 @@ export class AuthService {
         const authenticated = await compare(password, account.password);
         if (!authenticated) {
             throw new RpcException({
-                code: 16,
+                code: GrpcStatusCode.INVALID_ARGUMENT,
                 message: 'Tài khoản hoặc mật khẩu không chính xác',
                 error: '',
             });
@@ -63,7 +75,9 @@ export class AuthService {
         const token = this.jwtService.sign(payload, {
             secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
             expiresIn:
-                this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRE_MINUTES') + 'm',
+                this.configService.get<string>(
+                    'JWT_ACCESS_TOKEN_EXPIRE_MINUTES',
+                ) + 'm',
         });
 
         return {
