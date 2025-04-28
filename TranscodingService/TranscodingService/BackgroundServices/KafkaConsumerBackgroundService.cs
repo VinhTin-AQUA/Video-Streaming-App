@@ -37,6 +37,8 @@ namespace TranscodingService.BackgroundServices
                     {
                         var message = consumer.Consume(stoppingToken);
                         var task = JsonSerializer.Deserialize<VideoMetadataMessage>(message.Message.Value);
+                        Console.WriteLine($"message from {KafakaContants.VIDEO_ENCODING_TASKS_TOPIC} topic: {task!.VideoId}");
+
                         await videoProcessor.ProcessVideoAsync(task);
                     }
                 }

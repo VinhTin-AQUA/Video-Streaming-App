@@ -48,19 +48,19 @@ services:
     networks:
       - video-streaming
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    restart: always
-    depends_on:
-      - kafka
-    ports:
-      - "8080:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka:9092
-    networks:
-      - video-streaming
+#   kafka-ui:
+#     image: provectuslabs/kafka-ui:latest
+#     container_name: kafka-ui
+#     restart: always
+#     depends_on:
+#       - kafka
+#     ports:
+#       - "8080:8080"
+#     environment:
+#       KAFKA_CLUSTERS_0_NAME: local
+#       KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka:9092
+#     networks:
+#       - video-streaming
 
 networks:
   video-streaming:

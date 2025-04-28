@@ -35,7 +35,10 @@ namespace TranscodingService.Services
         // Upload cả thư mục chứa HLS chunks lên MinIO
         public async Task UploadDirectory(string localDirPath, string bucketName, string videoId)
         {
-            foreach (string filePath in Directory.GetFiles(localDirPath, "*", SearchOption.AllDirectories))
+            var allFiles = Directory.GetFiles(localDirPath, "*", SearchOption.AllDirectories);
+            var filesWithoutMp4 = allFiles.Where(file => !file.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)).ToArray();
+
+            foreach (string filePath in filesWithoutMp4)
             {
                 var args = new PutObjectArgs()
                     .WithBucket(bucketName)

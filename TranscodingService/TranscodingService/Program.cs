@@ -1,15 +1,15 @@
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Minio;
 using TranscodingService.BackgroundServices;
 using TranscodingService.Clients;
 using TranscodingService.Services;
 using Videometadata;
+using VideoUploadService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
-builder.Services.AddHostedService<KafkaConsumerBackgroundService>();
 builder.Services.AddSingleton<IMinioClient>(sp =>
 {
     var config = builder.Configuration.GetSection("Minio");
@@ -21,17 +21,14 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
     return client;
 });
 builder.Services.AddSingleton<MinIOService>();
-
-// Configure gRPC client
-builder.Services.AddSingleton<VideoUploadClientService>();
-
-// Configure gRPC channel
+builder.Services.AddSingleton<VideoMetadataClientService>();
 builder.Services.AddGrpcClient<VideoMetadataGRPC.VideoMetadataGRPCClient>(options =>
 {
     options.Address = new Uri(builder.Configuration["MetadataService:Url"]!);
 });
 
 builder.Services.AddSingleton<VideoProcessor>();
+builder.Services.AddHostedService<KafkaConsumerBackgroundService>();
 
 var app = builder.Build();
 

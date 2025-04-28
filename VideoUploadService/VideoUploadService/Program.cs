@@ -30,15 +30,11 @@ builder.Services.AddSingleton<VideoMetadataClient>();
 builder.Services.AddSingleton<KafkaProducerService>();
 //builder.Services.AddHostedService<KafkaConsumerBackgroundService>();
 
-
-
 // Configure gRPC channel
 builder.Services.AddGrpcClient<VideoMetadataGRPC.VideoMetadataGRPCClient>(options =>
 {
     options.Address = new Uri(builder.Configuration["MetadataService:Url"]!);
 });
-
-
 
 var app = builder.Build();
 
@@ -51,6 +47,9 @@ using (var scope = app.Services.CreateScope())
 {
     var minioService = scope.ServiceProvider.GetRequiredService<MinioService>();
     await minioService.Init();
+
+    var kafakProducerService = scope.ServiceProvider.GetRequiredService<KafkaProducerService>();
+    await kafakProducerService.Init();
 }
 
 app.Run();

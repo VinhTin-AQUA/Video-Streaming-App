@@ -3,12 +3,12 @@ using Videometadata;
 
 namespace TranscodingService.Clients
 {
-    public class VideoUploadClientService
+    public class VideoMetadataClientService
     {
         private readonly VideoMetadataGRPC.VideoMetadataGRPCClient client;
         private readonly IConfiguration configuration;
 
-        public VideoUploadClientService(
+        public VideoMetadataClientService(
             IConfiguration configuration)
         {
             this.configuration = configuration;

@@ -10,11 +10,11 @@ namespace TranscodingService.Services
     {
         private readonly MinIOService minIOService;
         private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly VideoUploadClientService videoUploadClientService;
+        private readonly VideoMetadataClientService videoUploadClientService;
 
         public VideoProcessor(MinIOService minIOService,
             IWebHostEnvironment webHostEnvironment,
-            VideoUploadClientService videoUploadClientService)
+            VideoMetadataClientService videoUploadClientService)
         {
             this.minIOService = minIOService;
             this.webHostEnvironment = webHostEnvironment;
@@ -32,7 +32,7 @@ namespace TranscodingService.Services
             var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.VideoId, videoMetadataMessage.FileName);
 
             // 2. Chuyển đổi bằng FFmpeg
-            var outputDir = $"{webHostEnvironment.WebRootPath}/{videoMetadataMessage.VideoId}/processed";
+            var outputDir = $"{webHostEnvironment.WebRootPath}/{videoMetadataMessage.VideoId}/";
             Directory.CreateDirectory(outputDir);
 
             // Sửa lại cách đặt dấu ngoặc kép cho output path
@@ -44,10 +44,9 @@ namespace TranscodingService.Services
                 StartInfo = {
                     FileName = "ffmpeg",
                     Arguments = $"-i \"{inputPath}\" " +  // Đặt ngoặc kép trực tiếp
-                               "-c:v libx264 -c:a aac -f dash -seg_duration 15 -window_size 5 " +
-                               "-extra_window_size 3 -min_seg_duration 15 " +
-                               $"-init_seg_name \"processed/init-stream$RepresentationID$.m4s\" " +
-                               $"-media_seg_name \"processed/chunk-stream$RepresentationID$-$Number%05d$.m4s\" " +
+                               "-c:v libx264 -c:a aac -f dash -seg_duration 5 " +
+                               $"-init_seg_name \"init-stream$RepresentationID$.m4s\" " +
+                               $"-media_seg_name \"chunk-stream$RepresentationID$-$Number%05d$.m4s\" " +
                                $"{quotedOutputPath}",
                      RedirectStandardError = true, // Bắt buộc phải đọc stderr
                     RedirectStandardOutput = true, // Nếu cần đọc stdout
@@ -72,6 +71,10 @@ namespace TranscodingService.Services
                 throw new RpcException(new Status(StatusCode.Internal, errMessage));
             }
 
+            process.Refresh();
+            process.CloseMainWindow();
+            process.Dispose();
+
             // 3. Upload lên MinIO
             await minIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.VideoId);
 
@@ -84,7 +87,12 @@ namespace TranscodingService.Services
                 }
             );
 
-            Directory.Delete(videoMetadataMessage.VideoId, recursive: true);
+            //if(Directory.Exists(Path.Combine(webHostEnvironment.WebRootPath, videoMetadataMessage.VideoId)))
+            //{
+            //    Directory.Delete(Path.Combine(webHostEnvironment.WebRootPath, videoMetadataMessage.VideoId), recursive: true);
+            //}
+
+            Console.WriteLine("Transcoding Successfully !!!");
         }
     }
 }
