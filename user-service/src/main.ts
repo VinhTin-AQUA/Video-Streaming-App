@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { join } from 'path';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { GrpcExceptionInterceptor } from './common/interceptors/rpc-exception.interceptor';
 
 async function bootstrap() {
     const appContext = await NestFactory.createApplicationContext(AppModule);
@@ -30,14 +31,15 @@ async function bootstrap() {
                             'KAFKA_URI',
                             'localhost:9092',
                         ),
-                    ], 
+                    ],
                 },
                 consumer: {
-                    groupId: 'user-management-consumer', 
+                    groupId: 'user-management-consumer',
                 },
             },
         });
 
+    app.useGlobalInterceptors(new GrpcExceptionInterceptor());
     await app.listen();
     await kafkaMicroservice.listen();
     console.log('Product Service is running port: 3003');

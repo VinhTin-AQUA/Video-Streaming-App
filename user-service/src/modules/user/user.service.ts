@@ -21,6 +21,7 @@ export class UserService {
         const r = await this.userRepo.add({
             ...model,
             _id: new Types.ObjectId(model.id),
+            avatarUrl: 'https://i.pinimg.com/736x/4c/2f/4c/4c2f4c74905d199957af7ee23489a9db.jpg'
         });
         if (!r) {
             throw new RpcException({
@@ -33,7 +34,7 @@ export class UserService {
             id: r._id.toString(),
             avatartUrl: '',
             email: r.email,
-            fulleName: r.fulleName,
+            fulleName: r.fullName,
         };
     }
 
@@ -52,9 +53,9 @@ export class UserService {
 
         return {
             id: r._id.toString(),
-            avatartUrl: r.avatartUrl,
+            avatartUrl: r.avatarUrl,
             email: r.email,
-            fulleName: r.fulleName,
+            fulleName: r.fullName,
         };
     }
 }

@@ -7,13 +7,13 @@ export class User {
     _id: Types.ObjectId;
 
     @Prop()
-    fulleName: string;
+    fullName: string;
 
     @Prop()
     email: string;
 
     @Prop()
-    avatartUrl: string;
+    avatarUrl: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

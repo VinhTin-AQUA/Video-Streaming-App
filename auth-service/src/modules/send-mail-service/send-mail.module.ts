@@ -9,12 +9,11 @@ import { ConfigService } from '@nestjs/config';
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
                 transport: {
-                    host: 'smtp.gmail.com', // SMTP Server (Ví dụ: Gmail)
-                    port: 587,
+                    host: configService.get<string>('EMAIL_HOST', ''), // SMTP Server (Ví dụ: Gmail)
+                    port: configService.get<number>('EMAIL_PORT', 0),
                     secure: false, // false cho STARTTLS, true cho SSL
                     auth: {
-                        user: 'ktrandang291@gmail.com', // Email của bạn
-                        // pass: 'dpsq vacb vsbv anqg', // Mật khẩu ứng dụng (App Password)
+                        user: configService.get<string>('EMAIL_ADDRESS', ''), // Email của bạn
                         pass: configService.get<string>(
                             'GOOGLE_EMAILL_APP_PASSWORD',
                         ),

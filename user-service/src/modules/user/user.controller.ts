@@ -2,6 +2,8 @@ import { Controller } from '@nestjs/common';
 import { UserService } from './user.service';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { KAFKA_REGISTER_USER_TOPIC } from 'src/common/const/kafka,contant';
+import { GrpcResponse } from 'src/common/response/grpc.response';
+import { GrpcStatusCode } from 'src/common/exception/grpc-status-code';
 
 @Controller()
 export class UserController {
@@ -13,20 +15,15 @@ export class UserController {
     // }
 
     @MessagePattern(KAFKA_REGISTER_USER_TOPIC)
-    getUserAdding(@Payload() payload: any) {
-        console.log(payload);
+    async getUserAdding(@Payload() payload: any) {
+        const r = await this.userService.addUser({ ...payload });
 
-        return { success: 'success' };
+        const response: GrpcResponse = {
+            data: null,
+            isSuccess: true,
+            message: '',
+            statusCode: GrpcStatusCode.OK,
+        };
+        return response;
     }
-
-    // async onModuleInit() {
-    //     try {
-    //         this.authClient.subscribeToResponseOf(KAFKA_REGISTER_USER_TOPIC);
-    //         await this.authClient.connect();
-
-    //         console.log('Connected to Kafka successfully');
-    //     } catch (error) {
-    //         console.error('Failed to connect to Kafka', error);
-    //     }
-    // }
 }

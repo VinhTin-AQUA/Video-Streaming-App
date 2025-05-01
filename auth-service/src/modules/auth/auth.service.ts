@@ -9,11 +9,12 @@ import { GrpcStatusCode } from 'src/common/exceptions/rpc-status-code';
 import { SendMailService } from '../send-mail-service/send-mail.service';
 import { KafkaProducerService } from '../kafka/kafka-producer.service';
 import { KAFKA_REGISTER_USER_TOPIC } from 'src/common/const/kafka,contant';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly authAccountRepository: AuthAccountRepository,
+        private readonly authAccountRepo: AuthAccountRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
         private readonly sendMailService: SendMailService,
@@ -21,54 +22,68 @@ export class AuthService {
     ) {}
 
     async register(model: RegisterRequest): Promise<RegisterResponse> {
-        // const accountExists = await this.authAccountRepository.findOneByQuery({
-        //     email: model.email,
-        // });
+        const accountExists = await this.authAccountRepo.findOne({
+            email: model.email,
+        });
 
-        // if (accountExists) {
-        //     throw new RpcException({
-        //         code: GrpcStatusCode.INVALID_ARGUMENT,
-        //         message:
-        //             'Email này đã được sử dụng. Vui lòng sử dụng email khác.',
-        //     });
-        // }
+        if (accountExists) {
+            throw new RpcException({
+                code: GrpcStatusCode.INVALID_ARGUMENT,
+                message:
+                    'Email này đã được đăng ký account. Vui lòng sử dụng email khác.',
+            });
+        }
 
-        // const account: Omit<AuthAccount, '_id'> = {
-        //     email: model.email,
-        //     password: await hash(model.password, 10),
-        // };
+        const account: Omit<AuthAccount, '_id'> = {
+            email: model.email,
+            password: await hash(model.password, 10),
+        };
 
-        // const r = await this.authAccountRepository.register(account);
-        // if (!r) {
-        //     throw new RpcException({
-        //         code: 3,
-        //         message: 'Đăng ký thất bại. Vui lòng thử lại',
-        //         error: '',
-        //     });
-        // }
+        const r = await this.authAccountRepo.add(account);
+        if (!r) {
+            throw new RpcException({
+                code: 3,
+                message: 'Đăng ký thất bại. Vui lòng thử lại',
+                error: '',
+            });
+        }
 
-        // await this.sendMailService.sendEmailConfirmAccount(
-        //     account.email,
-        //     model.fullName,
-        //     model.email,
-        // );
-
-        // const userProfileResult = await this.kafkaProducerService
-        //     .sendMessageWithResponse(KAFKA_REGISTER_USER_TOPIC, {
-        //         id: 'abcdef',
-        //         ...model,
-        //     });
-    
-        // await this.kafkaProducerService.sendMessage(
-        //     KAFKA_REGISTER_USER_TOPIC,
-        //     { ...model },
-        // );
-
-        const userProfileResult = await this.kafkaProducerService.sendMessageWithResponse(
-            KAFKA_REGISTER_USER_TOPIC,
-            { ...model },
+        await this.sendMailService.sendEmailConfirmAccount(
+            account.email,
+            model.fullName,
+            model.email,
         );
-        console.log(userProfileResult);
+
+        try {
+            const userProfileResult =
+                await this.kafkaProducerService.sendMessageWithResponse(
+                    KAFKA_REGISTER_USER_TOPIC,
+                    {
+                        id: r._id.toString(),
+                        ...model,
+                    },
+                );
+
+            if (userProfileResult.isSuccess === false) {
+                // roll back register
+                await this.removeAccount(r._id);
+
+                throw new RpcException({
+                    code: GrpcStatusCode.INVALID_ARGUMENT,
+                    message:
+                        'Email này đã được đăng ký user. Vui lòng sử dụng email khác.',
+                });
+            }
+        } catch {
+            // roll back register
+            await this.removeAccount(r._id);
+
+            throw new RpcException({
+                code: GrpcStatusCode.INVALID_ARGUMENT,
+                message:
+                    'Email này đã được đăng ký user. Vui lòng sử dụng email khác.',
+            });
+        }
 
         return {
             message: 'Đăng ký thành công',
@@ -76,7 +91,7 @@ export class AuthService {
     }
 
     async login(email: string, password: string): Promise<LoginResponse> {
-        const account = await this.authAccountRepository.findOneByQuery({
+        const account = await this.authAccountRepo.findOne({
             email: email,
         });
 
@@ -114,5 +129,11 @@ export class AuthService {
             jwt: token,
             message: 'Đăng nhập thành công',
         };
+    }
+
+    async removeAccount(id: Types.ObjectId) {
+        const r = await this.authAccountRepo.findOneAndDelete({
+            _id: id,
+        });
     }
 }
