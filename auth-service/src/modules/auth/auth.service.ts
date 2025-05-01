@@ -48,12 +48,6 @@ export class AuthService {
             });
         }
 
-        await this.sendMailService.sendEmailConfirmAccount(
-            account.email,
-            model.fullName,
-            model.email,
-        );
-
         try {
             const userProfileResult =
                 await this.kafkaProducerService.sendMessageWithResponse(
@@ -84,6 +78,12 @@ export class AuthService {
                     'Email này đã được đăng ký user. Vui lòng sử dụng email khác.',
             });
         }
+
+        await this.sendMailService.sendEmailConfirmAccount(
+            account.email,
+            model.fullName,
+            model.email,
+        );
 
         return {
             message: 'Đăng ký thành công',

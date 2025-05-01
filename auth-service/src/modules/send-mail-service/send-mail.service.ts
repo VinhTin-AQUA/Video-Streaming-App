@@ -11,8 +11,8 @@ export class SendMailService {
             await this.mailerService.sendMail({
                 to,
                 subject,
-                text: content, // Nội dung email dạng text
-                html: `<p>${content}</p>`, // Nội dung email dạng HTML
+                // text: content, // Nội dung email dạng text
+                html: content, // Nội dung email dạng HTML
             });
             return true;
         } catch (error) {

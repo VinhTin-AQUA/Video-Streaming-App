@@ -3,6 +3,7 @@ using API_Gateway.Middleware;
 using Auth;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using StreamingService;
+using VideoUploadService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +32,14 @@ builder.Services.AddGrpcClient<AuthGRPC.AuthGRPCClient>(options =>
     options.Address = new Uri(builder.Configuration["AuthService:Url"]!);
 });
 
+builder.Services.AddGrpcClient<VideoUploadGrpc.VideoUploadGrpcClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["VideoUploadService:Url"]!);
+});
+
 builder.Services.AddSingleton<VideoStreamingClient>();
 builder.Services.AddSingleton<AuthServiceClient>();
+builder.Services.AddSingleton<UploadServiceClient>();
 
 #endregion
 
