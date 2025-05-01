@@ -3,7 +3,6 @@ import { VideoMetadataRepository } from './repositories/video-metadata.repositor
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 
-
 @Injectable()
 export class VideoMetadataService {
     constructor(private videoMetadataRepository: VideoMetadataRepository) {}
@@ -11,9 +10,9 @@ export class VideoMetadataService {
     async addVideoMetadata(
         model: AddVideoMetadataRequest,
     ): Promise<VideoMetadata> {
-        const r = await this.videoMetadataRepository.addVideoMetada({
+        const r = await this.videoMetadataRepository.add({
             ...model,
-            status: '',
+            status: 'pending',
         });
         return {
             id: r._id.toString(),
@@ -25,11 +24,13 @@ export class VideoMetadataService {
             size: r.size,
             title: r.title,
             status: r.status,
+            thumbnailUrl: r.thumbnailUrl,
+            isPublic: r.isPublic,
         };
     }
 
     async getAllMetadata(): Promise<GetAllVideoMetadataResponse> {
-        const r = await this.videoMetadataRepository.findManyByQuery({});
+        const r = await this.videoMetadataRepository.findMany({});
         const response = r.map((v: any) => {
             return {
                 id: v._id.toString(),
@@ -71,6 +72,8 @@ export class VideoMetadataService {
             size: r.size,
             status: r.status,
             title: r.title,
+            thumbnailUrl: r.thumbnailUrl,
+            isPublic: r.isPublic,
         };
     }
 }

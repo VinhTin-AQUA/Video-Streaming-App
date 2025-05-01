@@ -28,18 +28,20 @@ namespace TranscodingService.Services
                 throw new RpcException(new Status(StatusCode.NotFound, "Nhận không nhận được message hoặc message bị lỗi"));
             }
 
-            // 1. Tải video từ MinIO
-            var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.VideoId, videoMetadataMessage.FileName);
+            #region create temp folder
 
-            // 2. Chuyển đổi bằng FFmpeg
+            var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.VideoId, videoMetadataMessage.FileName);
             var outputDir = $"{webHostEnvironment.WebRootPath}/{videoMetadataMessage.VideoId}/";
             Directory.CreateDirectory(outputDir);
 
-            // Sửa lại cách đặt dấu ngoặc kép cho output path
+            #endregion
+
+            #region gen dash
+
             var outputPath = Path.Combine(outputDir, "manifest.mpd");
             var quotedOutputPath = $"\"{outputPath}\"";
 
-            var process = new Process
+            var convertDashprocess = new Process
             {
                 StartInfo = {
                     FileName = "ffmpeg",
@@ -55,35 +57,65 @@ namespace TranscodingService.Services
                 }
             };
 
-            // Bắt đầu process
-            process.Start();
+            convertDashprocess.Start();
+            var convertDashStderrTask = convertDashprocess.StandardError.ReadToEndAsync();
+            var convertDashStdoutTask = convertDashprocess.StandardOutput.ReadToEndAsync();
 
-            // Đọc stderr và stdout để tránh deadlock
-            var stderrTask = process.StandardError.ReadToEndAsync();
-            var stdoutTask = process.StandardOutput.ReadToEndAsync();
-
-            // Chờ process kết thúc
-            await process.WaitForExitAsync();
-
-            if (process.ExitCode != 0)
+            await convertDashprocess.WaitForExitAsync();
+            if (convertDashprocess.ExitCode != 0)
             {
-                string errMessage = await process.StandardError.ReadToEndAsync();
+                string errMessage = await convertDashprocess.StandardError.ReadToEndAsync();
                 throw new RpcException(new Status(StatusCode.Internal, errMessage));
             }
 
-            process.Refresh();
-            process.CloseMainWindow();
-            process.Dispose();
+            convertDashprocess.Refresh();
+            convertDashprocess.CloseMainWindow();
+            convertDashprocess.Dispose();
 
-            // 3. Upload lên MinIO
+            #endregion
+
+            #region gen thumbnail
+
+            var thumbnailOutputPath = Path.Combine(outputDir, "thumbnail.jpg");
+            var thumbnailQuotedOutputPath = $"\"{thumbnailOutputPath}\"";
+            var genThumbnailProcess = new Process
+            {
+                StartInfo = {
+                    FileName = "ffmpeg",
+                    Arguments = $"-i \"{inputPath}\" " +
+                                $"-ss 00:00:05 -vframes 1 " +  // Đặt ngoặc kép trực tiếp
+                                $"{thumbnailQuotedOutputPath}",
+                    RedirectStandardError = true, // Bắt buộc phải đọc stderr
+                    RedirectStandardOutput = true, // Nếu cần đọc stdout
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            genThumbnailProcess.Start();
+            var genThumbnailStderrTask = genThumbnailProcess.StandardError.ReadToEndAsync();
+            var genThumbnailStdoutTask = genThumbnailProcess.StandardOutput.ReadToEndAsync();
+
+            await genThumbnailProcess.WaitForExitAsync();
+            if (genThumbnailProcess.ExitCode != 0)
+            {
+                string errMessage = await genThumbnailProcess.StandardError.ReadToEndAsync();
+                throw new RpcException(new Status(StatusCode.Internal, errMessage));
+            }
+
+            genThumbnailProcess.Refresh();
+            genThumbnailProcess.CloseMainWindow();
+            genThumbnailProcess.Dispose();
+
+            #endregion
+
             await minIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.VideoId);
-
-            // 4. Cập nhật Metadata
             await videoUploadClientService.UpdateVideoMetadat(
                 new Videometadata.UpdateVideoMetadataRequest
                 {
                     Id = videoMetadataMessage.VideoId,
-                    Status = "ready"
+                    Status = "ready",
+                    ThumbnailUrl = $"/{videoMetadataMessage.VideoId}/thumbnail.jpg"
                 }
             );
 

@@ -11,7 +11,7 @@ async function bootstrap() {
             transport: Transport.GRPC,
             options: {
                 package: 'videometadata',
-                protoPath: join(__dirname, './protos/video-metadata.proto'),
+                protoPath: join(__dirname, './protos/video_metadata.proto'),
                 url: '0.0.0.0:3002', // Port mà service sẽ lắng nghe
             },
         },

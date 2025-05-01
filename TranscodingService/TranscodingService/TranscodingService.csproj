@@ -21,7 +21,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos/video-metadata.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos/auth.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos/user.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos/video_metadata.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos/video_streaming.proto" GrpcServices="Client" />
+        <Protobuf Include="Protos/video_upload.proto" GrpcServices="Client" />
     </ItemGroup>
 
     <ItemGroup>

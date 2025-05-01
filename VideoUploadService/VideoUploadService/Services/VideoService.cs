@@ -28,9 +28,9 @@ namespace VideoUploadService.Services
             // 1. Tạo record trong Metadata Service qua gRPC
             var metadata = await videoMetadataClient.AddVideoMetadata(new AddVideoMetadataRequest
             {
-                Title = Path.GetFileNameWithoutExtension(request.Filename),
+                Title = Path.GetFileNameWithoutExtension(request.FileName),
                 Artist = request.Artist,
-                Filename = request.Filename,
+                Filename = request.FileName,
                 Desciption = request.Desciption,
                 Duration = request.Duration,
                 Formatname = request.FormatName,
@@ -47,7 +47,7 @@ namespace VideoUploadService.Services
 
             return new InitUploadResponse
             {
-                UploadId = metadata.Id,
+                VideoId = metadata.Id,
                 ChunkUrls = { chunkUrls }
             };
         }
@@ -56,7 +56,7 @@ namespace VideoUploadService.Services
         {
             // Verify all chunks exist in MinIO
             bool allChunksUploaded = await minio.VerifyChunks(
-                request.UploadId,
+                request.VideoId,
                 request.ChunkChecksums.Select(chunk => chunk).ToList(),
                 MinIOContants.RAW_VIDEOS_BUCKET_NAME
             );
@@ -73,18 +73,18 @@ namespace VideoUploadService.Services
             var metadata = await videoMetadataClient.UpdateVideoMetadata(
                new UpdateVideoMetadataRequest
                {
-                   Id = request.UploadId,
+                   Id = request.VideoId,
                    Status = "processing"
                }
             );
 
             // hợp nhất các chunks thành file gốc
-            await minio.ComebineChunks(request.UploadId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Filename);
+            await minio.ComebineChunks(request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Filename);
 
             // Publish to Kafka để xử lý encoding
             var message = new
             {
-                VideoId = request.UploadId,
+                VideoId = request.VideoId,
                 Checksums = request.ChunkChecksums,
                 FileName = $"{metadata.Filename}" 
             };
@@ -92,7 +92,7 @@ namespace VideoUploadService.Services
 
             return new CompleteUploadResponse
             {
-                VideoId = request.UploadId,
+                VideoId = request.VideoId,
                 Status = "processing",
             };
         }

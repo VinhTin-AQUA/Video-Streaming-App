@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package videometadata;
 
@@ -20,13 +20,15 @@ message VideoMetadata {
     int64 size = 7;
     string artist = 8;
     string status = 9;
+    string thumbnailUrl = 10;
+    bool isPublic = 11;
 }
 
 message AddVideoMetadataRequest {
     string title = 1;
     string desciption = 2;
     string filename = 3;
-    string formatname = 4;  
+    string formatname = 4;
     float duration = 5;
     int64 size = 6;
     string artist = 7;
@@ -40,4 +42,5 @@ message GetAllVideoMetadataResponse {
 message UpdateVideoMetadataRequest {
     string id = 1;
     string status = 2;
+    string thumbnailUrl = 3;
 }

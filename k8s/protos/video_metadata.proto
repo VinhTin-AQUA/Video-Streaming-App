@@ -20,6 +20,8 @@ message VideoMetadata {
     int64 size = 7;
     string artist = 8;
     string status = 9;
+    string thumbnailUrl = 10;
+    bool isPublic = 11;
 }
 
 message AddVideoMetadataRequest {
@@ -40,4 +42,5 @@ message GetAllVideoMetadataResponse {
 message UpdateVideoMetadataRequest {
     string id = 1;
     string status = 2;
+    string thumbnailUrl = 3;
 }

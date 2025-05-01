@@ -10,6 +10,8 @@ interface VideoMetadata {
     size: number;
     artist: string;
     status: string;
+    thumbnailUrl: string;
+    isPublic: boolean;
 }
 
 interface AddVideoMetadataRequest {
@@ -29,4 +31,5 @@ interface GetAllVideoMetadataResponse {
 interface UpdateVideoMetadataRequest {
     id: string;
     status: string;
+    thumbnailUrl: string;
 }

@@ -26,9 +26,15 @@ export class VideoMetadata {
 
     @Prop()
     artist: string;
-    
+
     @Prop()
     status: string;
+
+    @Prop()
+    thumbnailUrl: string;
+
+    @Prop({ type: SchemaTypes.Boolean, default: true })
+    isPublic: boolean;
 }
 
 export type VideoMetadataDocument = HydratedDocument<VideoMetadata>;

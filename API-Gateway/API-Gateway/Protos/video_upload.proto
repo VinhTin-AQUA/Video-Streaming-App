@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 option csharp_namespace = "VideoUploadService";
 
@@ -19,12 +19,12 @@ message InitUploadRequest {
 }
 
 message InitUploadResponse {
-  string uploadId = 1;
+  string videoId = 1;
   repeated string chunkUrls = 2; // Pre-signed URLs cho từng chunk
 }
 
 message CompleteUploadRequest {
-  string uploadId = 1;
+  string videoId = 1;
   repeated string chunkChecksums = 2; // SHA-256 của từng chunk
 }
 
