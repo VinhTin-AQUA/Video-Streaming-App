@@ -11,5 +11,8 @@ namespace API_Gateway.DTOs.Auth
         [Required(ErrorMessage = "Mật khẩu không được bỏ trống")]
         [StringLength(maximumLength: 16, MinimumLength = 8, ErrorMessage = "Mật khẩu ít nhất {2} ký tự và {1} ký tự")]
         public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Tên người dùng không được để trống")]
+        public string FullName { get; set; } = string.Empty;
     }
 }

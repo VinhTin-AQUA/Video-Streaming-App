@@ -26,6 +26,7 @@ namespace API_Gateway.Clients
             {
                 Email = model.Email,
                 Password = model.Password,
+                FullName = model.FullName,
             };
 
             RegisterResponse response = await client.RegisterAsync(request);

@@ -1,46 +1,46 @@
-
 interface Empty {}
 
 interface Auth {
-    id: string
-    password: string
-    email: string
+    id: string;
+    password: string;
+    email: string;
+    fullName: string;
 }
 
 interface RegisterRequest {
-    password: string
-    email: string
+    password: string;
+    email: string;
+    fullName: string;
 }
 
 interface RegisterResponse {
-    message: string
+    message: string;
 }
 
 interface LoginRequest {
-    password: string
-    email: string
+    password: string;
+    email: string;
 }
 
 interface LoginResponse {
-    message: string
-    jwt: string
+    message: string;
+    jwt: string;
 }
 
 interface ForgotPasswordRequest {
-    email: string
+    email: string;
 }
 
 interface ForgotPasswordResponse {
-    message: string
+    message: string;
 }
 
 interface ChangePasswordRequest {
-    email: string
-    oldPassword: string
-    newPassword: string
+    email: string;
+    oldPassword: string;
+    newPassword: string;
 }
 
 interface ChangePasswordResponse {
-    message: string
+    message: string;
 }
-

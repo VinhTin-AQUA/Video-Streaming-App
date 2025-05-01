@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { GrpcExceptionInterceptor } from './common/interceptors/rpc-exception.interceptor';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
@@ -13,11 +12,10 @@ async function bootstrap() {
         AppModule,
         {
             transport: Transport.GRPC,
-
             options: {
-                package: 'auth',
-                protoPath: join(__dirname, './protos/auth.proto'),
-                url: '0.0.0.0:3001',
+                package: 'user',
+                protoPath: join(__dirname, './protos/user.proto'),
+                url: '0.0.0.0:3003', // Port mà service sẽ lắng nghe
             },
         },
     );
@@ -32,18 +30,16 @@ async function bootstrap() {
                             'KAFKA_URI',
                             'localhost:9092',
                         ),
-                    ],
+                    ], 
                 },
                 consumer: {
-                    groupId: 'auth-consumer'
-                }
+                    groupId: 'user-management-consumer', 
+                },
             },
         });
 
-    app.useGlobalInterceptors(new GrpcExceptionInterceptor());
-
     await app.listen();
     await kafkaMicroservice.listen();
-    console.log('Product Service is running, port: 3001');
+    console.log('Product Service is running port: 3003');
 }
 bootstrap();

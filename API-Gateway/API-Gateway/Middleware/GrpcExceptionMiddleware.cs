@@ -49,7 +49,7 @@ namespace API_Gateway.Middleware
             };
 
             context.Response.StatusCode = (int)statusCode;
-            return context.Response.WriteAsJsonAsync(new { Error = exception.Status.Detail });
+            return context.Response.WriteAsJsonAsync(new { Error = exception.Status.Detail, stackTrace = exception.StackTrace });
         }
     }
 }

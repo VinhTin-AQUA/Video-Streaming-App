@@ -1,10 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject, OnModuleInit } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GrpcMethod } from '@nestjs/microservices';
+import { ClientKafka, GrpcMethod } from '@nestjs/microservices';
+import { KAFKA_REGISTER_USER_TOPIC } from 'src/common/const/kafka,contant';
 
 @Controller()
-export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+export class AuthController  {
+    constructor(private readonly authService: AuthService,
+    ) {}
+
+    
 
     @GrpcMethod('AuthGRPC', 'Register')
     async register(data: RegisterRequest) {
@@ -20,4 +24,5 @@ export class AuthController {
         );
         return r;
     }
+
 }

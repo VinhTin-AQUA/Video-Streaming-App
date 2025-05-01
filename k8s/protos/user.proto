@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package user;
+
+service UserGRPC {
+    rpc AddUser (AddUserRequest) returns (User);
+    rpc UpdateUser (UpdateUserRequest) returns (User);
+}
+  
+message Empty {}
+
+message User {
+    string id = 1;
+    string fulleName = 2;
+    string email = 3;
+    string avatartUrl = 4;
+}
+
+message AddUserRequest {
+    string id = 1;
+    string fulleName = 2;
+    string email = 3;
+    string avatartUrl = 4;
+}
+
+message UpdateUserRequest {
+    string id = 1;
+    string fulleName = 2;
+    string email = 3;
+    string avatartUrl = 4;
+}
+
+
+

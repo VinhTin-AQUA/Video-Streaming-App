@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthAccount, AuthAccountSchema } from './entities/auth-account.entity';
 import { AuthAccountRepository } from './repositories/auth-account.repository';
 import { JwtModule } from '@nestjs/jwt';
+import { SendMailModule } from '../send-mail-service/send-mail.module';
+import { KafkaModule } from '../kafka/kafka.module';
 
 @Module({
     imports: [
@@ -17,6 +19,8 @@ import { JwtModule } from '@nestjs/jwt';
             },
         ]),
         JwtModule,
+        SendMailModule,
+        KafkaModule,
     ],
     controllers: [AuthController],
     providers: [AuthService, AuthAccountRepository],

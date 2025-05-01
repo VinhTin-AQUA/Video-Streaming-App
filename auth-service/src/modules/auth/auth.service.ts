@@ -6,6 +6,9 @@ import { compare, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { GrpcStatusCode } from 'src/common/exceptions/rpc-status-code';
+import { SendMailService } from '../send-mail-service/send-mail.service';
+import { KafkaProducerService } from '../kafka/kafka-producer.service';
+import { KAFKA_REGISTER_USER_TOPIC } from 'src/common/const/kafka,contant';
 
 @Injectable()
 export class AuthService {
@@ -13,33 +16,60 @@ export class AuthService {
         private readonly authAccountRepository: AuthAccountRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly sendMailService: SendMailService,
+        private readonly kafkaProducerService: KafkaProducerService,
     ) {}
 
     async register(model: RegisterRequest): Promise<RegisterResponse> {
-        const accountExists = await this.authAccountRepository.findOneByQuery({
-            email: model.email,
-        });
+        // const accountExists = await this.authAccountRepository.findOneByQuery({
+        //     email: model.email,
+        // });
 
-        if(accountExists) {
-            throw new RpcException({
-                code: GrpcStatusCode.INVALID_ARGUMENT,
-                message: 'Email này đã được sử dụng. Vui lòng sử dụng email khác.',
-            })
-        }
+        // if (accountExists) {
+        //     throw new RpcException({
+        //         code: GrpcStatusCode.INVALID_ARGUMENT,
+        //         message:
+        //             'Email này đã được sử dụng. Vui lòng sử dụng email khác.',
+        //     });
+        // }
 
-        const account: Omit<AuthAccount, '_id'> = {
-            email: model.email,
-            password: await hash(model.password, 10),
-        };
+        // const account: Omit<AuthAccount, '_id'> = {
+        //     email: model.email,
+        //     password: await hash(model.password, 10),
+        // };
 
-        const r = await this.authAccountRepository.register(account);
-        if (!r) {
-            throw new RpcException({
-                code: 3,
-                message: 'Đăng ký thất bại. Vui lòng thử lại',
-                error: '',
-            });
-        }
+        // const r = await this.authAccountRepository.register(account);
+        // if (!r) {
+        //     throw new RpcException({
+        //         code: 3,
+        //         message: 'Đăng ký thất bại. Vui lòng thử lại',
+        //         error: '',
+        //     });
+        // }
+
+        // await this.sendMailService.sendEmailConfirmAccount(
+        //     account.email,
+        //     model.fullName,
+        //     model.email,
+        // );
+
+        // const userProfileResult = await this.kafkaProducerService
+        //     .sendMessageWithResponse(KAFKA_REGISTER_USER_TOPIC, {
+        //         id: 'abcdef',
+        //         ...model,
+        //     });
+    
+        // await this.kafkaProducerService.sendMessage(
+        //     KAFKA_REGISTER_USER_TOPIC,
+        //     { ...model },
+        // );
+
+        const userProfileResult = await this.kafkaProducerService.sendMessageWithResponse(
+            KAFKA_REGISTER_USER_TOPIC,
+            { ...model },
+        );
+        console.log(userProfileResult);
+
         return {
             message: 'Đăng ký thành công',
         };
