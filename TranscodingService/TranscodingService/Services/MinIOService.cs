@@ -15,17 +15,17 @@ namespace TranscodingService.Services
         }
 
         // Tải video từ MinIO về local
-        public async Task<string> DownloadVideo(string videoId, string fileName)
+        public async Task<string> DownloadVideo(string userId, string videoId, string fileName, string bucketName)
         {
-            string localFolder = Path.Combine(webHostEnvironment.WebRootPath, videoId);
+            string localFolder = Path.Combine(webHostEnvironment.WebRootPath, userId, videoId);
             if(!Directory.Exists(localFolder))
             {
                 Directory.CreateDirectory(localFolder);
             }
             string localPath = Path.Combine(localFolder, fileName);
             var args = new GetObjectArgs()
-                .WithBucket("raw-videos") // tên bucket
-                .WithObject($"{videoId}/{fileName}") // tên file trên MinIO
+                .WithBucket(bucketName) // tên bucket
+                .WithObject($"{userId}/{videoId}/{fileName}") // tên file trên MinIO
                 .WithFile(localPath); // đường dẫn lưu file
 
             await minioClient.GetObjectAsync(args);
@@ -33,7 +33,7 @@ namespace TranscodingService.Services
         }
 
         // Upload cả thư mục chứa HLS chunks lên MinIO
-        public async Task UploadDirectory(string localDirPath, string bucketName, string videoId)
+        public async Task UploadDirectory(string localDirPath, string bucketName, string userName, string videoId)
         {
             var allFiles = Directory.GetFiles(localDirPath, "*", SearchOption.AllDirectories);
             var filesWithoutMp4 = allFiles.Where(file => !file.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)).ToArray();
@@ -42,7 +42,7 @@ namespace TranscodingService.Services
             {
                 var args = new PutObjectArgs()
                     .WithBucket(bucketName)
-                    .WithObject($"{videoId}/{Path.GetFileName(filePath)}") // tên file sau khi up lên
+                    .WithObject($"{userName}/{videoId}/{Path.GetFileName(filePath)}") // tên file sau khi up lên
                     .WithFileName(filePath) // đường dẫn file cục bộ trên máy để upload lên
                     .WithContentType(GetMimeType(filePath)); // định nghĩa loại file upload
 

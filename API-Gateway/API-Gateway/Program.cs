@@ -1,8 +1,11 @@
 using API_Gateway.Clients;
 using API_Gateway.Middleware;
 using Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.IdentityModel.Tokens;
 using StreamingService;
+using System.Text;
 using VideoUploadService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,13 +46,46 @@ builder.Services.AddSingleton<UploadServiceClient>();
 
 #endregion
 
+
+#region JWT
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        // validate the issuer (who ever is issuing the JWT)
+        ValidateIssuer = true,
+        ValidateIssuerSigningKey = true, // validate token based on the key we have provided in appsetting.json
+
+        // don't validate audience (angular side)
+        ValidateAudience = false,
+
+        //ValidAudience = builder.Configuration.GetSection("JWT:ValidAudience").Value,
+        // the issuer which in here is the api project url
+        ValidIssuer = builder.Configuration.GetSection("JWT:Issuer").Value,
+
+        // the issuer signin key based on JWT:Key
+        IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JWT:Key").Value!))
+    };
+});
+
+
+#endregion
+
+
 // enable cors
 builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowOrigin", option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
-
-
 
 var app = builder.Build();
 
@@ -64,6 +100,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

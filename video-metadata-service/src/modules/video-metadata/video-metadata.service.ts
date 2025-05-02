@@ -14,18 +14,18 @@ export class VideoMetadataService {
             ...model,
             status: 'pending',
         });
+
         return {
             id: r._id.toString(),
-            artist: r.artist,
             desciption: r.desciption,
             duration: r.duration,
-            filename: r.filename,
-            formatname: r.formatname,
+            formatName: r.formatName,
             size: r.size,
             title: r.title,
             status: r.status,
             thumbnailUrl: r.thumbnailUrl,
             isPublic: r.isPublic,
+            userId: r.userId,
         };
     }
 
@@ -34,13 +34,12 @@ export class VideoMetadataService {
         const response = r.map((v: any) => {
             return {
                 id: v._id.toString(),
-                artist: v.artist,
                 desciption: v.desciption,
                 duration: v.duration,
-                filename: v.filename,
-                formatname: v.formatname,
+                formatName: v.formatName,
                 size: v.size,
                 title: v.title,
+                thumbnailUrl: v.thumbnailUrl,
             };
         }) as VideoMetadata[];
         return {
@@ -63,17 +62,16 @@ export class VideoMetadataService {
             });
         }
         return {
-            artist: r.artist,
+            id: r._id.toString(),
             desciption: r.desciption,
             duration: r.duration,
-            filename: r.filename,
-            formatname: r.formatname,
-            id: r._id.toString(),
+            formatName: r.formatName,
             size: r.size,
-            status: r.status,
             title: r.title,
             thumbnailUrl: r.thumbnailUrl,
             isPublic: r.isPublic,
+            status: r.status,
+            userId: r.userId,
         };
     }
 }

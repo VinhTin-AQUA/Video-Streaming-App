@@ -24,7 +24,6 @@ namespace API_Gateway.Clients
         {
             InitUploadRequest request = new()
             {
-                Artist = model.Artist,
                 Desciption = model.Desciption,
                 Duration = model.Duration,
                 FileName = model.Filename,

@@ -10,6 +10,7 @@ import { SendMailService } from '../send-mail-service/send-mail.service';
 import { KafkaProducerService } from '../kafka/kafka-producer.service';
 import { KAFKA_REGISTER_USER_TOPIC } from 'src/common/const/kafka,contant';
 import { Types } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -115,6 +116,9 @@ export class AuthService {
         const payload = {
             id: account._id,
             email: account.email,
+            jti: uuidv4(),
+            iss: this.configService.get<string>('JWT_ISSUER'),
+            aud: this.configService.get<string>('JWT_VALIDAUDIENCE'),
         };
 
         const token = this.jwtService.sign(payload, {

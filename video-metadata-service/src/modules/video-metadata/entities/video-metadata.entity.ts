@@ -13,19 +13,13 @@ export class VideoMetadata {
     desciption: string;
 
     @Prop()
-    filename: string;
-
-    @Prop()
-    formatname: string;
+    formatName: string;
 
     @Prop({ type: Number })
     duration: number;
 
     @Prop({ type: Number })
     size: number;
-
-    @Prop()
-    artist: string;
 
     @Prop()
     status: string;
@@ -35,6 +29,9 @@ export class VideoMetadata {
 
     @Prop({ type: SchemaTypes.Boolean, default: true })
     isPublic: boolean;
+
+    @Prop({ })
+    userId: string;
 }
 
 export type VideoMetadataDocument = HydratedDocument<VideoMetadata>;

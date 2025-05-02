@@ -10,7 +10,7 @@ namespace TranscodingService.Services
     {
         private readonly MinIOService minIOService;
         private readonly IWebHostEnvironment webHostEnvironment;
-        private readonly VideoMetadataClientService videoUploadClientService;
+        private readonly VideoMetadataClientService videoMetadataClientService;
 
         public VideoProcessor(MinIOService minIOService,
             IWebHostEnvironment webHostEnvironment,
@@ -18,7 +18,7 @@ namespace TranscodingService.Services
         {
             this.minIOService = minIOService;
             this.webHostEnvironment = webHostEnvironment;
-            this.videoUploadClientService = videoUploadClientService;
+            this.videoMetadataClientService = videoUploadClientService;
         }
 
         public async Task ProcessVideoAsync(VideoMetadataMessage? videoMetadataMessage)
@@ -30,8 +30,11 @@ namespace TranscodingService.Services
 
             #region create temp folder
 
-            var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.VideoId, videoMetadataMessage.FileName);
-            var outputDir = $"{webHostEnvironment.WebRootPath}/{videoMetadataMessage.VideoId}/";
+            var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.UserId, 
+                                                            videoMetadataMessage.VideoId, 
+                                                            videoMetadataMessage.Title, 
+                                                            MinIOContants.RAW_VIDEOS_BUCKET_NAME);
+            var outputDir = $"{webHostEnvironment.WebRootPath}/{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/";
             Directory.CreateDirectory(outputDir);
 
             #endregion
@@ -109,13 +112,13 @@ namespace TranscodingService.Services
 
             #endregion
 
-            await minIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.VideoId);
-            await videoUploadClientService.UpdateVideoMetadat(
+            await minIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.UserId, videoMetadataMessage.VideoId);
+            await videoMetadataClientService.UpdateVideoMetadat(
                 new Videometadata.UpdateVideoMetadataRequest
                 {
                     Id = videoMetadataMessage.VideoId,
                     Status = "ready",
-                    ThumbnailUrl = $"/{videoMetadataMessage.VideoId}/thumbnail.jpg"
+                    ThumbnailUrl = $"{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/thumbnail.jpg"
                 }
             );
 

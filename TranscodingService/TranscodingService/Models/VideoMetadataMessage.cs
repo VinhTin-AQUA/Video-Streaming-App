@@ -4,6 +4,7 @@
     {
         public string VideoId { get; set; } = string.Empty;
         public List<string> Checksums { get; set; } = [];
-        public string FileName { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string UserId {  get; set; } = string.Empty;
     }
 }

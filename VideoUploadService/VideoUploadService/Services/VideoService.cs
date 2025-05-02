@@ -29,19 +29,18 @@ namespace VideoUploadService.Services
             var metadata = await videoMetadataClient.AddVideoMetadata(new AddVideoMetadataRequest
             {
                 Title = Path.GetFileNameWithoutExtension(request.FileName),
-                Artist = request.Artist,
-                Filename = request.FileName,
                 Desciption = request.Desciption,
                 Duration = request.Duration,
-                Formatname = request.FormatName,
+                FormatName = request.FormatName,
                 Size = request.Size,
+                UserId = request.UserId,
             });
 
             // 2. Tạo pre-signed URLs cho từng chunk (ví dụ: 5MB/chunk)
             var chunkUrls = new List<string>();
             for (int i = 0; i < CalculateChunkCount(request.Size); i++)
             {
-                string objectName = $"{metadata.Id}/chunk-{i}";
+                string objectName = $"{metadata.UserId}/{metadata.Id}/chunk-{i}";
                 chunkUrls.Add(await minio.GeneratePresignedUrl(objectName, MinIOContants.RAW_VIDEOS_BUCKET_NAME));
             }
 
@@ -56,6 +55,7 @@ namespace VideoUploadService.Services
         {
             // Verify all chunks exist in MinIO
             bool allChunksUploaded = await minio.VerifyChunks(
+                request.UserId,
                 request.VideoId,
                 request.ChunkChecksums.Select(chunk => chunk).ToList(),
                 MinIOContants.RAW_VIDEOS_BUCKET_NAME
@@ -79,14 +79,15 @@ namespace VideoUploadService.Services
             );
 
             // hợp nhất các chunks thành file gốc
-            await minio.ComebineChunks(request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Filename);
+            await minio.ComebineChunks(request.UserId, request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Title);
 
             // Publish to Kafka để xử lý encoding
             var message = new
             {
                 VideoId = request.VideoId,
                 Checksums = request.ChunkChecksums,
-                FileName = $"{metadata.Filename}" 
+                Title = metadata.Title,
+                UserId = request.UserId,
             };
             await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS_TOPIC, message);
 

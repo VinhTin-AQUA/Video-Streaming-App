@@ -40,14 +40,14 @@ namespace VideoUploadService.Services
             return signedUrl;
         }
 
-        public async Task<bool> VerifyChunks(string uploadId, List<string> expectedChunks, string bucketName)
+        public async Task<bool> VerifyChunks(string userId, string uploadId, List<string> expectedChunks, string bucketName)
         {
             if (expectedChunks == null || expectedChunks.Count == 0)
                 return false;
 
             var args = new ListObjectsArgs()
                 .WithBucket(bucketName)
-                .WithPrefix($"{uploadId}/chunk-");
+                .WithPrefix($"{userId}/{uploadId}/chunk-");
 
             var actualChunks = new Dictionary<int, string>(); // Key: chunk number, Value: SHA256 hash
             var observable = minioClient.ListObjectsEnumAsync(args);
@@ -95,7 +95,7 @@ namespace VideoUploadService.Services
             return true;
         }
 
-        public async Task<bool> ComebineChunks(string uploadId, string bucketName, string finalObjectName)
+        public async Task<bool> ComebineChunks(string userId, string uploadId, string bucketName, string finalObjectName)
         {
             // Kiểm tra bucket tồn tại
             bool found = await minioClient.BucketExistsAsync(
@@ -110,7 +110,7 @@ namespace VideoUploadService.Services
             // Lấy danh sách các chunks
             var listArgs = new ListObjectsArgs()
                 .WithBucket(bucketName)
-                .WithPrefix($"{uploadId}/")
+                .WithPrefix($"{userId}/{uploadId}/")
                 .WithRecursive(true);
 
             var chunks = new List<Item>();
@@ -151,7 +151,7 @@ namespace VideoUploadService.Services
                 {
                     var putArgs = new PutObjectArgs()
                         .WithBucket(bucketName)
-                        .WithObject($"{uploadId}/{finalObjectName}")
+                        .WithObject($"{userId}/{uploadId}/{finalObjectName}")
                         .WithStreamData(fileStream)
                         .WithObjectSize(fileStream.Length)
                         .WithContentType("application/octet-stream");

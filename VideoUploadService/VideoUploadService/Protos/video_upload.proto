@@ -24,8 +24,9 @@ message InitUploadResponse {
 }
 
 message CompleteUploadRequest {
-  string videoId = 1;
-  repeated string chunkChecksums = 2; // SHA-256 của từng chunk
+  string userId = 1;
+  string videoId = 2;
+  repeated string chunkChecksums = 3; // SHA-256 của từng chunk
 }
 
 message CompleteUploadResponse {

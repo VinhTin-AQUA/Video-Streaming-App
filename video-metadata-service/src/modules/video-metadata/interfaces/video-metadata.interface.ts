@@ -4,24 +4,22 @@ interface VideoMetadata {
     id: string;
     title: string;
     desciption: string;
-    filename: string;
-    formatname: string;
+    formatName: string;
     duration: number;
     size: number;
-    artist: string;
     status: string;
     thumbnailUrl: string;
     isPublic: boolean;
+    userId: string;
 }
 
 interface AddVideoMetadataRequest {
     title: string;
     desciption: string;
-    filename: string;
-    formatname: string;
+    formatName: string;
     duration: number;
     size: number;
-    artist: string;
+    userId: string;
 }
 
 interface GetAllVideoMetadataResponse {
