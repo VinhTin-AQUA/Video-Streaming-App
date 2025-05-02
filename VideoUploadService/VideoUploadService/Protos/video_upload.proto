@@ -15,7 +15,6 @@ message InitUploadRequest {
     string formatName = 5;
     float duration = 6;
     int64 size = 7;
-    string artist = 8;
 }
 
 message InitUploadResponse {
