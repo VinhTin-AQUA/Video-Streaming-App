@@ -3,7 +3,7 @@ interface Empty {}
 interface VideoMetadata {
     id: string;
     title: string;
-    desciption: string;
+    description: string;
     formatName: string;
     duration: number;
     size: number;
@@ -15,7 +15,7 @@ interface VideoMetadata {
 
 interface AddVideoMetadataRequest {
     title: string;
-    desciption: string;
+    description: string;
     formatName: string;
     duration: number;
     size: number;

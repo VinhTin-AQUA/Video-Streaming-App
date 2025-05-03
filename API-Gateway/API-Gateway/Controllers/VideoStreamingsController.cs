@@ -15,17 +15,17 @@ namespace API_Gateway.Controllers
             this.videoStreamingClient = videoStreamingClient;
         }
 
-        [HttpGet("dash/{videoId}/{fileName}")]
-        public async Task<IActionResult> GetManifestContent(string videoId, string fileName)
+        [HttpGet("dash/{userId}/{videoId}/{fileName}")]
+        public async Task<IActionResult> GetManifestContent(string userId, string videoId, string fileName)
         {
             // http://localhost:5246/api/videostreamings/dash/680e544cc25ced24733b73a8/processed/init-stream0.m4s
             if (fileName == "manifest.mpd")
             {
-                var manifest = await videoStreamingClient.GetDashManifest(videoId, fileName);
+                var manifest = await videoStreamingClient.GetDashManifest(userId, videoId, fileName);
                 return Content(manifest.Content, manifest.ContentType);
             }
 
-            var chunks = await videoStreamingClient.GetDashChunks(videoId, fileName);
+            var chunks = await videoStreamingClient.GetDashChunks(userId, videoId, fileName);
             return File(chunks.Bytes, chunks.ContentType);
         }
     }

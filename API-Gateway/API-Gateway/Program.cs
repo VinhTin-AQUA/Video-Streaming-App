@@ -40,12 +40,18 @@ builder.Services.AddGrpcClient<VideoUploadGrpc.VideoUploadGrpcClient>(options =>
     options.Address = new Uri(builder.Configuration["VideoUploadService:Url"]!);
 });
 
+builder.Services.AddGrpcClient<VideoUploadGrpc.VideoUploadGrpcClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["VideoMetadataService:Url"]!);
+});
+
+
 builder.Services.AddSingleton<VideoStreamingClient>();
 builder.Services.AddSingleton<AuthServiceClient>();
 builder.Services.AddSingleton<UploadServiceClient>();
+builder.Services.AddSingleton<VideoMetadataClient>();
 
 #endregion
-
 
 #region JWT
 

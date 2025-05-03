@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { VideoMetadataRepository } from './repositories/video-metadata.repository';
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
+import { MinioService } from '../minio/minio.service';
+import { RAW_VIDEOS_BUCKET_NAME } from 'src/common/const/minio.contants';
 
 @Injectable()
 export class VideoMetadataService {
-    constructor(private videoMetadataRepository: VideoMetadataRepository) {}
+    constructor(
+        private videoMetadataRepository: VideoMetadataRepository,
+        private minioService: MinioService,
+    ) {}
 
     async addVideoMetadata(
         model: AddVideoMetadataRequest,
@@ -17,7 +22,7 @@ export class VideoMetadataService {
 
         return {
             id: r._id.toString(),
-            desciption: r.desciption,
+            description: r.description,
             duration: r.duration,
             formatName: r.formatName,
             size: r.size,
@@ -34,14 +39,25 @@ export class VideoMetadataService {
         const response = r.map((v: any) => {
             return {
                 id: v._id.toString(),
-                desciption: v.desciption,
+                description: v.description,
                 duration: v.duration,
                 formatName: v.formatName,
                 size: v.size,
                 title: v.title,
                 thumbnailUrl: v.thumbnailUrl,
+                status: v.status,
+                isPublic: v.isPublic,
+                userId: v.userId,
             };
         }) as VideoMetadata[];
+
+        for (let i of response) {
+            i.thumbnailUrl = await this.minioService.createPresignedUrl(
+                RAW_VIDEOS_BUCKET_NAME,
+                `/${i.userId}/${i.id}/thumbnail.jpg`,
+            );
+        }
+
         return {
             videoMetadatas: response,
         };
@@ -63,7 +79,7 @@ export class VideoMetadataService {
         }
         return {
             id: r._id.toString(),
-            desciption: r.desciption,
+            description: r.description,
             duration: r.duration,
             formatName: r.formatName,
             size: r.size,

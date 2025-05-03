@@ -7,6 +7,7 @@ import {
     VideoMetadataSchema,
 } from './entities/video-metadata.entity';
 import { VideoMetadataRepository } from './repositories/video-metadata.repository';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { VideoMetadataRepository } from './repositories/video-metadata.repositor
                 discriminators: [],
             },
         ]),
+        MinioModule,
     ],
     providers: [VideoMetadataService, VideoMetadataRepository],
     controllers: [VideoMetadataController],

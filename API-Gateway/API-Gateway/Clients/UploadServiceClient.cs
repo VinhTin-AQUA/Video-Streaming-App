@@ -15,8 +15,8 @@ namespace API_Gateway.Clients
         {
             this.configuration = configuration;
 
-            var productServiceUrl = configuration["VideoUploadService:Url"];
-            var channel = GrpcChannel.ForAddress(productServiceUrl!);
+            var videoUploadServiceUrl = configuration["VideoUploadService:Url"];
+            var channel = GrpcChannel.ForAddress(videoUploadServiceUrl!);
             client = new VideoUploadGrpc.VideoUploadGrpcClient(channel);
         }
 
@@ -24,7 +24,7 @@ namespace API_Gateway.Clients
         {
             InitUploadRequest request = new()
             {
-                Desciption = model.Desciption,
+                Description = model.Description,
                 Duration = model.Duration,
                 FileName = model.Filename,
                 FormatName = model.FormatName,
@@ -46,6 +46,7 @@ namespace API_Gateway.Clients
             CompleteUploadRequest request = new()
             {
                 VideoId = model.VideoId,
+                UserId = model.UserId,
             };
             request.ChunkChecksums.Add(model.ChunkChecksums);
 

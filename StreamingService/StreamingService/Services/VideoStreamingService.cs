@@ -17,7 +17,7 @@ namespace StreamingService.Services
         {
             try
             {
-                var objectName = $"{request.VideoId}/{request.FileName}";
+                var objectName = $"{request.UserId}/{request.VideoId}/{request.FileName}";
                 string manifestContent = await minIOService.GetManifestContent(MinIOContants.RAW_VIDEOS_BUCKET_NAME, objectName);
 
                 return new GetDashManifestResponse
@@ -36,7 +36,7 @@ namespace StreamingService.Services
         {
             try
             {
-                var objectName = $"{request.VideoId}/{request.FileName}";
+                var objectName = $"{request.UserId}/{request.VideoId}/{request.FileName}";
                 byte[] bytes = await minIOService.GetFileBytes(MinIOContants.RAW_VIDEOS_BUCKET_NAME, objectName);
 
                 return new GetDashChunksResponse
@@ -61,8 +61,6 @@ namespace StreamingService.Services
                 ".mp4" => "video/mp4",
                 _ => "application/octet-stream",
             };
-
-
             return mimeType;
         }
     }

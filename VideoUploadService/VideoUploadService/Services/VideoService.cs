@@ -28,8 +28,8 @@ namespace VideoUploadService.Services
             // 1. Tạo record trong Metadata Service qua gRPC
             var metadata = await videoMetadataClient.AddVideoMetadata(new AddVideoMetadataRequest
             {
-                Title = Path.GetFileNameWithoutExtension(request.FileName),
-                Desciption = request.Desciption,
+                Title = request.FileName,
+                Description = request.Description,
                 Duration = request.Duration,
                 FormatName = request.FormatName,
                 Size = request.Size,

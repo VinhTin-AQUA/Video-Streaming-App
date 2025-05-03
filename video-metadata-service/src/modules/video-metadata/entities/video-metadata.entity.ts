@@ -10,7 +10,7 @@ export class VideoMetadata {
     title: string;
 
     @Prop()
-    desciption: string;
+    description: string;
 
     @Prop()
     formatName: string;

@@ -15,8 +15,8 @@ namespace API_Gateway.Clients
         {
             this.configuration = configuration;
 
-            var productServiceUrl = configuration["AuthService:Url"];
-            var channel = GrpcChannel.ForAddress(productServiceUrl!);
+            var authServiceUrl = configuration["AuthService:Url"];
+            var channel = GrpcChannel.ForAddress(authServiceUrl!);
             client = new AuthGRPC.AuthGRPCClient(channel);
         }
 

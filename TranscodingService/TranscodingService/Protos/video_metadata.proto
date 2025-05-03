@@ -13,7 +13,7 @@ message Empty {}
 message VideoMetadata {
     string id = 1;
     string title = 2;
-    string desciption = 3;
+    string description = 3;
     string formatName = 4;
     float duration = 5;
     int64 size = 6;
@@ -25,7 +25,7 @@ message VideoMetadata {
 
 message AddVideoMetadataRequest {
     string title = 2;
-    string desciption = 3;
+    string description = 3;
     string formatName = 4;
     float duration = 5;
     int64 size = 6;

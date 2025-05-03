@@ -10,8 +10,9 @@ service VideoStreaming {
 }
 
 message GetDashManifestRequest {
-  string videoId = 1;
-  string fileName = 2;
+  string userId = 1;
+  string videoId = 2;
+  string fileName = 3;
 }
 
 message GetDashManifestResponse {
@@ -20,8 +21,9 @@ message GetDashManifestResponse {
 }
 
 message GetDashChunksRequest {
-  string videoId = 1;
-  string fileName = 2;
+    string userId = 1;
+    string videoId = 2;
+    string fileName = 3;
 }
 
 message GetDashChunksResponse {
