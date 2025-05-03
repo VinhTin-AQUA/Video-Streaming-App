@@ -1,0 +1,67 @@
+<!-- app.component.html -->
+<div class="flex h-screen flex-col">
+    <!-- Header: sticky on top -->
+
+    <div class="sticky top-0 z-50 bg-white">
+        <app-header></app-header>
+    </div>
+
+    <!-- Main layout with sidebar and scrollable content -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- <aside
+            class="w-60 h-screen bg-white shadow-md p-4 hidden md:block overflow-y-auto"
+        >
+            <nav class="space-y-2">
+                @for (category of categories; track $index) {
+                <div
+                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                >
+                    <span class="material-icons text-gray-600">{{
+                        category.icon
+                    }}</span>
+                    <span class="text-sm font-medium">{{ category.name }}</span>
+                </div>
+                }
+            </nav>
+        </aside> -->
+
+        <!-- Scrollable content -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4"
+            >
+                @for (video of videos; track $index) {
+                <a
+                    [routerLink]="['/home/video-view']"
+                    [queryParams]="{
+                        userId: video.userId,
+                        videoId: video.id,
+                        fileName: 'manifest.mpd'
+                    }"
+                    class="cursor-pointer block"
+                >
+                    <img
+                        [src]="video.thumbnailUrl"
+                        alt="thumbnail"
+                        class="rounded-xl w-full"
+                    />
+                    <div class="flex mt-3">
+                        <img
+                            [src]="video.thumbnailUrl"
+                            class="w-10 h-10 rounded-full mr-3"
+                        />
+                        <div>
+                            <h3 class="text-sm font-semibold line-clamp-2">
+                                {{ video.title }}
+                            </h3>
+                            <p class="clamp text-gray-600 text-sm">
+                                {{ video.description }}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+                }
+            </div>
+        </main>
+    </div>
+</div>

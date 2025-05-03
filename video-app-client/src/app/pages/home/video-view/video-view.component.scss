@@ -1,0 +1,69 @@
+.video-js .vjs-big-play-button {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 68px;
+    height: 48px;
+    border: none;
+    background-color: rgba(255, 0, 0, 0.8);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.video-js .vjs-big-play-button:hover {
+    background-color: #ff0000;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.video-js .vjs-big-play-button .vjs-icon-placeholder:before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5em;
+}
+
+/* Custom control bar */
+.vjs-youtube-style .vjs-control-bar {
+    background: rgba(0, 0, 0, 0.7) !important;
+    height: 40px;
+    padding: 0 10px;
+}
+
+.vjs-youtube-style .vjs-progress-control {
+    position: absolute;
+    top: -10px;
+    width: 100%;
+    height: 10px;
+}
+
+.vjs-youtube-style .vjs-progress-holder {
+    margin: 0;
+    height: 100%;
+}
+
+.vjs-youtube-style .vjs-play-progress {
+    background-color: #ff0000;
+}
+
+.vjs-youtube-style .vjs-play-progress:before {
+    display: none;
+}
+
+.vjs-youtube-style .vjs-volume-panel {
+    order: 4;
+}
+
+.vjs-youtube-style .vjs-time-control {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
+
+.vjs-youtube-style .vjs-remaining-time {
+    display: none;
+}
+
+.vjs-youtube-style .vjs-fullscreen-control {
+    order: 5;
+}

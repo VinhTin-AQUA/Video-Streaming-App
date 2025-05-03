@@ -1,0 +1,40 @@
+<div class="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-md mt-10">
+    <h2 class="text-2xl font-semibold mb-4 text-center">Upload Video</h2>
+
+    <label
+        for="video"
+        class="block w-full border-2 border-dashed border-gray-300 p-6 text-center cursor-pointer rounded-xl hover:border-blue-400 transition"
+    >
+        <input
+            type="file"
+            id="video"
+            class="hidden"
+            (change)="onFileSelected($event)"
+            accept="video/*"
+        />
+        <span class="text-gray-500">Click to select a video file</span>
+    </label>
+
+    @if(videoThumbnail) {
+    <div class="mt-4 text-center">
+        <p class="text-lg font-medium text-green-600">Selected Video:</p>
+        <img
+            [src]="videoThumbnail"
+            alt="Video Thumbnail"
+            class="mx-auto rounded-lg shadow-md mt-2"
+        />
+    </div>
+    } @if(title) {
+    <div class="mt-4 text-center">
+        <p class="text-gray-800">{{ title }}</p>
+    </div>
+    }
+
+    <button
+        (click)="initUpload()"
+        [disabled]="!selectedFile"
+        class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl disabled:bg-gray-300"
+    >
+        Upload
+    </button>
+</div>
