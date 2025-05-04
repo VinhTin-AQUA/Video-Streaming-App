@@ -3,21 +3,22 @@ import { VideoMetadataRepository } from './repositories/video-metadata.repositor
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 import { MinioService } from '../minio/minio.service';
-import { RAW_VIDEOS_BUCKET_NAME } from 'src/common/const/minio.contants';
+import { ASSET_BUCKET_NAME, RAW_VIDEOS_BUCKET_NAME } from 'src/common/const/minio.contants';
 
 @Injectable()
 export class VideoMetadataService {
     constructor(
-        private videoMetadataRepository: VideoMetadataRepository,
+        private videoMetadataRepo: VideoMetadataRepository,
         private minioService: MinioService,
     ) {}
 
     async addVideoMetadata(
-        model: AddVideoMetadataRequest,
+        request: AddVideoMetadataRequest,
     ): Promise<VideoMetadata> {
-        const r = await this.videoMetadataRepository.add({
-            ...model,
+        const r = await this.videoMetadataRepo.add({
+            ...request,
             status: 'pending',
+            thumbnailUrl: '/loading.gif'
         });
 
         return {
@@ -35,7 +36,7 @@ export class VideoMetadataService {
     }
 
     async getAllMetadata(): Promise<GetAllVideoMetadataResponse> {
-        const r = await this.videoMetadataRepository.findMany({});
+        const r = await this.videoMetadataRepo.findMany({});
         const response = r.map((v: any) => {
             return {
                 id: v._id.toString(),
@@ -52,7 +53,7 @@ export class VideoMetadataService {
         }) as VideoMetadata[];
 
         for (let i of response) {
-            i.thumbnailUrl = await this.minioService.createPresignedUrl(
+            i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
                 RAW_VIDEOS_BUCKET_NAME,
                 `/${i.userId}/${i.id}/thumbnail.jpg`,
             );
@@ -66,7 +67,7 @@ export class VideoMetadataService {
     async updateVideoMetadata(
         model: UpdateVideoMetadataRequest,
     ): Promise<VideoMetadata> {
-        const r = await this.videoMetadataRepository.findOneAndUpdate(
+        const r = await this.videoMetadataRepo.findOneAndUpdate(
             { _id: new Types.ObjectId(model.id) },
             model,
         );
@@ -88,6 +89,48 @@ export class VideoMetadataService {
             isPublic: r.isPublic,
             status: r.status,
             userId: r.userId,
+        };
+    }
+
+    async getVideoMetadatasOfUser(request: GetVideoMetadatasOfUserRequest) {
+        const r = await this.videoMetadataRepo.findMany({
+            userId: request.userId,
+        });
+
+        const response = r.map((v: any) => {
+            return {
+                id: v._id.toString(),
+                description: v.description,
+                duration: v.duration,
+                formatName: v.formatName,
+                size: v.size,
+                title: v.title,
+                thumbnailUrl: v.thumbnailUrl,
+                status: v.status,
+                isPublic: v.isPublic,
+                userId: v.userId,
+            };
+        }) as VideoMetadata[];
+
+        for (let i of response) {
+
+            if(i.status === 'ready') {
+                i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
+                    RAW_VIDEOS_BUCKET_NAME,
+                    `/${i.userId}/${i.id}/thumbnail.jpg`,
+                );
+            }
+            else {
+                i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
+                    ASSET_BUCKET_NAME,
+                    `/loading.gif`,
+                );
+            }
+
+        }
+
+        return {
+            videoMetadatas: response,
         };
     }
 }

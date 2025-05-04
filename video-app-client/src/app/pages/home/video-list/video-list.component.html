@@ -2,9 +2,7 @@
 <div class="flex h-screen flex-col">
     <!-- Header: sticky on top -->
 
-    <div class="sticky top-0 z-50 bg-white">
-        <app-header></app-header>
-    </div>
+
 
     <!-- Main layout with sidebar and scrollable content -->
     <div class="flex flex-1 overflow-hidden">
@@ -43,7 +41,7 @@
                     <img
                         [src]="video.thumbnailUrl"
                         alt="thumbnail"
-                        class="rounded-xl w-full"
+                        class="rounded-xl w-full h-[200px] object-cover"
                     />
                     <div class="flex mt-3">
                         <img

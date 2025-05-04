@@ -1,8 +1,9 @@
 ﻿using Grpc.Core;
 using System.Diagnostics;
 using TranscodingService.Clients;
-using TranscodingService.Contants;
+using TranscodingService.Common.Contants;
 using TranscodingService.Models;
+using TranscodingService.Services.Kafka;
 
 namespace TranscodingService.Services
 {
@@ -11,14 +12,18 @@ namespace TranscodingService.Services
         private readonly MinIOService minIOService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly VideoMetadataClientService videoMetadataClientService;
+        private readonly KafkaProducerService kafkaProducerService;
 
         public VideoProcessor(MinIOService minIOService,
             IWebHostEnvironment webHostEnvironment,
-            VideoMetadataClientService videoUploadClientService)
+            VideoMetadataClientService videoUploadClientService,
+            KafkaProducerService kafkaProducerService
+            )
         {
             this.minIOService = minIOService;
             this.webHostEnvironment = webHostEnvironment;
             this.videoMetadataClientService = videoUploadClientService;
+            this.kafkaProducerService = kafkaProducerService;
         }
 
         public async Task ProcessVideoAsync(VideoMetadataMessage? videoMetadataMessage)
@@ -121,6 +126,16 @@ namespace TranscodingService.Services
                     ThumbnailUrl = $"{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/thumbnail.jpg"
                 }
             );
+
+            var thumbnailPresignUrl = await minIOService.GenGetPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, $"{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/thumbnail.jpg");
+            var videoUpdate = new
+            {
+                UserId = $"video_status_update_{videoMetadataMessage.UserId}",
+                VideoId = videoMetadataMessage.VideoId,
+                Status = "ready",
+                ThumbnailUrl = thumbnailPresignUrl,
+            };
+            await kafkaProducerService.SendMessageAsync(KafkaContants.VIDEO_STATUS_UPDATED, videoUpdate);
 
             //if(Directory.Exists(Path.Combine(webHostEnvironment.WebRootPath, videoMetadataMessage.VideoId)))
             //{

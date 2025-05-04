@@ -2,17 +2,19 @@
 using Minio;
 using Videometadata;
 using VideoUploadService.Clients;
-using VideoUploadService.Interceptors;
+using VideoUploadService.Common.Interceptors;
 using VideoUploadService.Services;
+using VideoUploadService.Services.Kafka;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 builder.Services.AddGrpc(options =>
 {
     options.Interceptors.Add<GrpcExceptionInterceptor>();
     options.EnableDetailedErrors = true;
 });
+
+#region minio
 
 builder.Services.AddSingleton<IMinioClient>(sp =>
 {
@@ -26,9 +28,23 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
 });
 
 builder.Services.AddSingleton<MinioService>();
+
+#endregion
+
+#region services
+
 builder.Services.AddSingleton<VideoMetadataClient>();
+
+#endregion
+
+#region kafka
+
 builder.Services.AddSingleton<KafkaProducerService>();
 //builder.Services.AddHostedService<KafkaConsumerBackgroundService>();
+
+#endregion
+
+#region grpc
 
 // Configure gRPC channel
 builder.Services.AddGrpcClient<VideoMetadataGRPC.VideoMetadataGRPCClient>(options =>
@@ -36,20 +52,13 @@ builder.Services.AddGrpcClient<VideoMetadataGRPC.VideoMetadataGRPCClient>(option
     options.Address = new Uri(builder.Configuration["MetadataService:Url"]!);
 });
 
+#endregion 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<VideoService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-
-// Đảm bảo bucket tồn tại
-using (var scope = app.Services.CreateScope())
-{
-    var minioService = scope.ServiceProvider.GetRequiredService<MinioService>();
-    await minioService.Init();
-
-    var kafakProducerService = scope.ServiceProvider.GetRequiredService<KafkaProducerService>();
-    await kafakProducerService.Init();
-}
 
 app.Run();

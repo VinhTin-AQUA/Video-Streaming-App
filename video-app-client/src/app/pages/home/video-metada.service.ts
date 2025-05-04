@@ -13,4 +13,11 @@ export class VideoMetadaService {
             environment.apiUrl + '/videometadatas/get-all-videometadatas'
         );
     }
+
+    getVideoMetadasOfUser() {
+        return this.http.get(
+            environment.apiUrl + '/videometadatas/get-all-videometadatas-of-user'
+        );
+    }
+
 }

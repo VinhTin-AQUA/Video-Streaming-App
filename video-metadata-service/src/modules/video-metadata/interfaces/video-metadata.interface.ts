@@ -31,3 +31,7 @@ interface UpdateVideoMetadataRequest {
     status: string;
     thumbnailUrl: string;
 }
+
+interface GetVideoMetadatasOfUserRequest {
+    userId: string;
+}

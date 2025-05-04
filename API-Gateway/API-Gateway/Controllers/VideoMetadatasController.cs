@@ -1,6 +1,8 @@
 ﻿using API_Gateway.Clients;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API_Gateway.Controllers
 {
@@ -19,6 +21,21 @@ namespace API_Gateway.Controllers
         public async Task<IActionResult> GetAllVideoMetadatas()
         {
             var r = await videoMetadataClient.GetAllVideoMetaData();
+            return Ok(r);
+        }
+
+
+        [HttpGet("get-all-videometadatas-of-user")]
+        [Authorize]
+        public async Task<IActionResult> GetAllVideoMetadatasOfUser()
+        {
+            string? userId = User.FindFirstValue("id");
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Unauthorized" });
+            }
+
+            var r = await videoMetadataClient.GetVideoMetadatasOfUser(userId);
             return Ok(r);
         }
     }

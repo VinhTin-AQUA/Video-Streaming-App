@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Signup } from './dtos/sign-up.dto';
 import { environment } from '../../../environments/environment.development';
 import { Signin } from './dtos/sign-in.dto';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
     providedIn: 'root',
@@ -34,5 +35,15 @@ export class AuthService {
 
     getToken() {
         return localStorage.getItem(this.jwtTokenKey);
+    }
+
+    getCurrentUserId() {
+        const token = this.getToken();
+
+        if (!token) {
+            return;
+        }
+        const decoded = jwtDecode(token) as any;
+        return decoded.id;
     }
 }

@@ -20,7 +20,7 @@ export class MinioService {
         });
     }
 
-    async createPresignedUrl(bucketName: string, objectName: string) {
+    async genGetPresignedUrl(bucketName: string, objectName: string) {
         const presignedUrl = await this.minioClient.presignedUrl(
             'get',
             bucketName,

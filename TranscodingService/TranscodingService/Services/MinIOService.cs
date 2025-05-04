@@ -50,6 +50,16 @@ namespace TranscodingService.Services
             }
         }
 
+        public async Task<string> GenGetPresignedUrl(string bucketName, string objectName)
+        {
+            var args = new PresignedGetObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectName)
+                .WithExpiry(3600); // 1 hour expiry
+            string signedUrl = await minioClient.PresignedGetObjectAsync(args);
+            return signedUrl;
+        }
+
         private string GetMimeType(string filePath)
         {
             return Path.GetExtension(filePath) switch

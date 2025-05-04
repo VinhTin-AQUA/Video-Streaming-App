@@ -6,6 +6,7 @@ service VideoMetadataGRPC {
     rpc AddVideoMetadata(AddVideoMetadataRequest) returns (VideoMetadata);
     rpc GetAllVideoMetadata(Empty) returns (GetAllVideoMetadataResponse);
     rpc UpdateVideoMetadata(UpdateVideoMetadataRequest) returns (VideoMetadata);
+    rpc GetVideoMetadatasOfUser(GetVideoMetadatasOfUserRequest) returns (GetVideoMetadatasOfUserResponse);
 }
   
 message Empty {}
@@ -41,4 +42,12 @@ message UpdateVideoMetadataRequest {
     string id = 1;
     string status = 2;
     string thumbnailUrl = 3;
+}
+
+message GetVideoMetadatasOfUserRequest {
+    string userId = 1;
+}
+
+message GetVideoMetadatasOfUserResponse {
+    repeated VideoMetadata videoMetadatas = 1;
 }

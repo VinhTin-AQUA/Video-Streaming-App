@@ -1,12 +1,12 @@
 ﻿using Minio.DataModel.Args;
 using Minio;
-using VideoUploadService.Contants;
 using Minio.DataModel;
 using Grpc.Core;
 using Minio.ApiEndpoints;
 using System.Security.Cryptography;
 using VideoUploadService.Utils;
 using System.IO;
+using VideoUploadService.Common.Contants;
 
 namespace VideoUploadService.Services
 {
@@ -19,17 +19,7 @@ namespace VideoUploadService.Services
             this.minioClient = minioClient;
         }
 
-
-        public async Task Init()
-        {
-            bool found = await minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(MinIOContants.RAW_VIDEOS_BUCKET_NAME));
-            if (!found)
-            {
-                await minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(MinIOContants.RAW_VIDEOS_BUCKET_NAME));
-            }
-        }
-
-        public async Task<string> GeneratePresignedUrl(string objectName, string bucketName)
+        public async Task<string> GenPutPresignedUrl(string bucketName, string objectName)
         {
             var args = new PresignedPutObjectArgs()
                 .WithBucket(bucketName)

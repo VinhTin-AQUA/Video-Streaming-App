@@ -3,7 +3,8 @@ using Google.Protobuf.WellKnownTypes;
 using VideoUploadService.Clients;
 using Videometadata;
 using System.Text.Json;
-using VideoUploadService.Contants;
+using VideoUploadService.Common.Contants;
+using VideoUploadService.Services.Kafka;
 
 
 namespace VideoUploadService.Services
@@ -25,7 +26,7 @@ namespace VideoUploadService.Services
 
         public override async Task<InitUploadResponse> InitUpload(InitUploadRequest request, ServerCallContext context)
         {
-            // 1. Tạo record trong Metadata Service qua gRPC
+            // tạo record trong Metadata Service qua gRPC
             var metadata = await videoMetadataClient.AddVideoMetadata(new AddVideoMetadataRequest
             {
                 Title = request.FileName,
@@ -36,12 +37,12 @@ namespace VideoUploadService.Services
                 UserId = request.UserId,
             });
 
-            // 2. Tạo pre-signed URLs cho từng chunk (ví dụ: 5MB/chunk)
+            // tạo pre-signed URLs cho từng chunk (5MB/chunk)
             var chunkUrls = new List<string>();
             for (int i = 0; i < CalculateChunkCount(request.Size); i++)
             {
                 string objectName = $"{metadata.UserId}/{metadata.Id}/chunk-{i}";
-                chunkUrls.Add(await minio.GeneratePresignedUrl(objectName, MinIOContants.RAW_VIDEOS_BUCKET_NAME));
+                chunkUrls.Add(await minio.GenPutPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, objectName));
             }
 
             return new InitUploadResponse
@@ -53,7 +54,7 @@ namespace VideoUploadService.Services
 
         public override async Task<CompleteUploadResponse> CompleteUpload(CompleteUploadRequest request, ServerCallContext context)
         {
-            // Verify all chunks exist in MinIO
+            // verify chunks in MinIO
             bool allChunksUploaded = await minio.VerifyChunks(
                 request.UserId,
                 request.VideoId,
@@ -69,7 +70,7 @@ namespace VideoUploadService.Services
                 ));
             }
 
-            // Cập nhật Metadata
+            // cập nhật Metadata
             var metadata = await videoMetadataClient.UpdateVideoMetadata(
                new UpdateVideoMetadataRequest
                {
@@ -77,6 +78,14 @@ namespace VideoUploadService.Services
                    Status = "processing"
                }
             );
+
+            //var videoUpdate = new
+            //{
+            //    UserId = $"video_status_update_{request.UserId}",
+            //    VideoId = request.VideoId,
+            //    Status = "processing",
+            //};
+            //await kafkaProducerService.SendMessageAsync(KafkaContants.VIDEO_STATUS_UPDATED, videoUpdate);
 
             // hợp nhất các chunks thành file gốc
             await minio.ComebineChunks(request.UserId, request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Title);
@@ -89,7 +98,7 @@ namespace VideoUploadService.Services
                 Title = metadata.Title,
                 UserId = request.UserId,
             };
-            await kafkaProducerService.SendMessageAsync(KafakaContants.VIDEO_ENCODING_TASKS_TOPIC, message);
+            await kafkaProducerService.SendMessageAsync(KafkaContants.VIDEO_ENCODING_TASKS_TOPIC, message);
 
             return new CompleteUploadResponse
             {

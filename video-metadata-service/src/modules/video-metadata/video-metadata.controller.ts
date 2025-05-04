@@ -7,8 +7,8 @@ export class VideoMetadataController {
     constructor(private readonly videoMetadataService: VideoMetadataService) {}
 
     @GrpcMethod('VideoMetadataGRPC', 'AddVideoMetadata')
-    async addVideoMetadata(model: AddVideoMetadataRequest) {
-        const r = await this.videoMetadataService.addVideoMetadata(model);
+    async addVideoMetadata(request: AddVideoMetadataRequest) {
+        const r = await this.videoMetadataService.addVideoMetadata(request);
         return r;
     }
 
@@ -17,11 +17,16 @@ export class VideoMetadataController {
         const r = await this.videoMetadataService.getAllMetadata();
         return r;
     }
-
     
     @GrpcMethod('VideoMetadataGRPC', 'UpdateVideoMetadata')
-    async updateVideoMetadata(model: UpdateVideoMetadataRequest) {
-        const r = await this.videoMetadataService.updateVideoMetadata(model);
+    async updateVideoMetadata(request: UpdateVideoMetadataRequest) {
+        const r = await this.videoMetadataService.updateVideoMetadata(request);
+        return r;
+    }
+
+    @GrpcMethod('VideoMetadataGRPC', 'GetVideoMetadatasOfUser')
+    async getVideoMetadatasOfUser(request: GetVideoMetadatasOfUserRequest) {
+        const r = await this.videoMetadataService.getVideoMetadatasOfUser(request);
         return r;
     }
 }

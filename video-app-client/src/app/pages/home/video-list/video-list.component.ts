@@ -26,7 +26,6 @@ export class VideoListComponent  {
     ngAfterViewInit() {
         this.videoMetadaService.getAllVideoMetadas().subscribe({
             next: (res: any) => {
-                console.log(res);
                 this.videos = res;
             },
             error: (err) => {

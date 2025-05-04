@@ -3,10 +3,12 @@ import { UploadService } from '../upload.service';
 import { VideoInfor } from '../dtos/video-info.dto';
 import { concatMap, switchMap } from 'rxjs';
 import { CompleteUpload } from '../dtos/complete-upload.dto';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-upload',
-    imports: [],
+    imports: [FormsModule],
     templateUrl: './upload.component.html',
     styleUrl: './upload.component.scss',
 })
@@ -20,7 +22,7 @@ export class UploadComponent {
     size: number = 0;
     title: string = '';
 
-    constructor(private uploadService: UploadService) {}
+    constructor(private uploadService: UploadService, private router: Router) {}
 
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -74,7 +76,7 @@ export class UploadComponent {
 
     initUpload() {
         const model: VideoInfor = {
-            desciption: this.description,
+            description: this.description,
             duration: this.duration,
             fileName: this.fileName,
             formatName: this.formatName,
@@ -98,12 +100,17 @@ export class UploadComponent {
                     );
                 }),
                 concatMap(() => {
-                    return this.uploadService.completeUpload(this.selectedFile!, totalChunks, videoId);
+                    return this.uploadService.completeUpload(
+                        this.selectedFile!,
+                        totalChunks,
+                        videoId
+                    );
                 })
             )
             .subscribe({
                 next: () => {
                     console.log('Tất cả các bước upload hoàn tất!');
+                    this.router.navigateByUrl('/user/info')
                 },
                 error: (err) => {
                     console.error('Có lỗi xảy ra trong quá trình upload:', err);

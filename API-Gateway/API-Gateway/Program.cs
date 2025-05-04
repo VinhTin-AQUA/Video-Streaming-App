@@ -1,9 +1,14 @@
-using API_Gateway.Clients;
+﻿using API_Gateway.Clients;
+using API_Gateway.Hubs;
 using API_Gateway.Middleware;
+using API_Gateway.Services;
+using API_Gateway.Services.Kafka;
+using API_Gateway.Services.KafkaBackgroundServices;
 using Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
+using Minio;
 using StreamingService;
 using System.Text;
 using VideoUploadService;
@@ -22,6 +27,23 @@ builder.Services.AddSwaggerGen();
 //{
 //    options.ConfigureEndpointDefaults(lo => lo.Protocols = HttpProtocols.Http1AndHttp2);
 //});
+
+#region minio
+
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    var config = builder.Configuration.GetSection("Minio");
+    var client = new MinioClient()
+                .WithEndpoint(config["Endpoint"])
+                .WithCredentials(config["AccessKey"], config["SecretKey"])
+                .Build();
+
+    return client;
+});
+
+builder.Services.AddSingleton<MinioService>();
+
+#endregion
 
 #region Configure gRPC channel
 
@@ -86,12 +108,29 @@ builder.Services.AddAuthentication(options =>
 
 #endregion
 
+#region kafka
 
-// enable cors
-builder.Services.AddCors(c =>
+builder.Services.AddSingleton<KafkaProducerService>();
+builder.Services.AddHostedService<VideoUpdateStatusBackgroundService>();
+
+#endregion
+
+#region cors
+
+builder.Services.AddCors(options =>
 {
-    c.AddPolicy("AllowOrigin", option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("CorsPolicy", builder => builder
+        .WithOrigins("http://localhost:4200") // Angular dev server
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials() // Bắt buộc khi dùng SignalR với token/cookie
+    );
 });
+
+#endregion
+
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -104,7 +143,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-app.UseCors(option => option.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -112,5 +151,18 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<GrpcExceptionMiddleware>();
+
+app.MapHub<UpdateVideoHup>("/hub/video-update-hub").RequireCors("CorsPolicy"); ;
+
+// Đảm bảo bucket tồn tại
+using (var scope = app.Services.CreateScope())
+{
+    var minioService = scope.ServiceProvider.GetRequiredService<MinioService>();
+    await minioService.Init();
+
+    var kafakProducerService = scope.ServiceProvider.GetRequiredService<KafkaProducerService>();
+    await kafakProducerService.Init();
+}
+
 
 app.Run();

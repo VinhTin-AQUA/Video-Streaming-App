@@ -19,12 +19,9 @@ export class VideoViewComponent {
 
     ngOnInit(): void {
         this.activatedRoute.queryParams.subscribe((res: any) => {
-            console.log(res);
-
             // fileName
             // userId
             // videoId
-
             this.player = videojs(this.videoElementRef.nativeElement, {
                 techOrder: ['dash', 'html5'],
                 controls: true,
