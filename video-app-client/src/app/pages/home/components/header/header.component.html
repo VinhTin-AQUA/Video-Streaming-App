@@ -1,5 +1,5 @@
 <header
-    class="w-full flex items-center justify-between p-4 shadow shadow-rose-300 bg-rose-700"
+    class="w-full flex items-center justify-between p-4 shadow shadow-rose-300 bg-black"
 >
     <!-- Logo -->
     <div class="flex items-center space-x-2">
@@ -13,11 +13,16 @@
             class="flex justify-start items-center gap-2 border border-rose-200 rounded-full focus-within:ring-1 focus-within:ring-rose-300 focus-within:border-rose-500 px-2 transition"
         >
             <input
+                [(ngModel)]="searchString"
                 type="text"
                 placeholder="Search..."
                 class="w-full px-4 py-2 outline-none text-white"
             />
-            <button type="button" class="hover:text-rose-500">
+            <button
+                (click)="onSearch()"
+                type="button"
+                class="hover:text-rose-500"
+            >
                 <!-- Icon kính lúp (Heroicons) -->
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

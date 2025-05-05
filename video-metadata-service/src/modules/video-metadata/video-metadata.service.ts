@@ -3,7 +3,11 @@ import { VideoMetadataRepository } from './repositories/video-metadata.repositor
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 import { MinioService } from '../minio/minio.service';
-import { ASSET_BUCKET_NAME, RAW_VIDEOS_BUCKET_NAME } from 'src/common/const/minio.contants';
+import {
+    ASSET_BUCKET_NAME,
+    RAW_VIDEOS_BUCKET_NAME,
+} from 'src/common/const/minio.contants';
+import { GrpcStatusCode } from 'src/common/exception/rpc-status-code';
 
 @Injectable()
 export class VideoMetadataService {
@@ -18,7 +22,7 @@ export class VideoMetadataService {
         const r = await this.videoMetadataRepo.add({
             ...request,
             status: 'pending',
-            thumbnailUrl: '/loading.gif'
+            thumbnailUrl: '/loading.gif',
         });
 
         return {
@@ -113,20 +117,64 @@ export class VideoMetadataService {
         }) as VideoMetadata[];
 
         for (let i of response) {
-
-            if(i.status === 'ready') {
+            if (i.status === 'ready') {
                 i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
                     RAW_VIDEOS_BUCKET_NAME,
                     `/${i.userId}/${i.id}/thumbnail.jpg`,
                 );
-            }
-            else {
+            } else {
                 i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
                     ASSET_BUCKET_NAME,
                     `/loading.gif`,
                 );
             }
+        }
 
+        return {
+            videoMetadatas: response,
+        };
+    }
+
+    async getVideoMetadataById(request: GetVideoMetadataByIdRequest) {
+        const r = await this.videoMetadataRepo.findOne({ _id: request.id });
+
+        if (!r) {
+            throw new RpcException({
+                code: GrpcStatusCode.NOT_FOUND,
+                message: 'Video not found',
+            });
+        }
+        return r;
+    }
+
+    async searchVideos(request: SearchVideosByTitleRequest) {
+        if (!request.title) {
+            const rr = await this.getAllMetadata();
+            return rr;
+        }
+        const r = await this.videoMetadataRepo.findMany({
+            title: { $regex: request.title, $options: 'i' },
+        });
+        const response = r.map((v: any) => {
+            return {
+                id: v._id.toString(),
+                description: v.description,
+                duration: v.duration,
+                formatName: v.formatName,
+                size: v.size,
+                title: v.title,
+                thumbnailUrl: v.thumbnailUrl,
+                status: v.status,
+                isPublic: v.isPublic,
+                userId: v.userId,
+            };
+        }) as VideoMetadata[];
+
+        for (let i of response) {
+            i.thumbnailUrl = await this.minioService.genGetPresignedUrl(
+                RAW_VIDEOS_BUCKET_NAME,
+                `/${i.userId}/${i.id}/thumbnail.jpg`,
+            );
         }
 
         return {

@@ -7,6 +7,8 @@ service VideoMetadataGRPC {
     rpc GetAllVideoMetadata(Empty) returns (GetAllVideoMetadataResponse);
     rpc UpdateVideoMetadata(UpdateVideoMetadataRequest) returns (VideoMetadata);
     rpc GetVideoMetadatasOfUser(GetVideoMetadatasOfUserRequest) returns (GetVideoMetadatasOfUserResponse);
+    rpc GetVideoMetadataById(GetVideoMetadataByIdRequest) returns (VideoMetadata);
+    rpc SearchVideosByTitle(SearchVideosByTitleRequest) returns (SearchVideosByTitleResponse);
 }
   
 message Empty {}
@@ -49,5 +51,17 @@ message GetVideoMetadatasOfUserRequest {
 }
 
 message GetVideoMetadatasOfUserResponse {
+    repeated VideoMetadata videoMetadatas = 1;
+}
+
+message GetVideoMetadataByIdRequest {
+    string id = 1;
+}
+
+message SearchVideosByTitleRequest { 
+    string title = 1;
+}
+
+message SearchVideosByTitleResponse {
     repeated VideoMetadata videoMetadatas = 1;
 }

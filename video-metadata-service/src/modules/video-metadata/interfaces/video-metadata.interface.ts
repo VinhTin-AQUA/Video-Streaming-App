@@ -35,3 +35,15 @@ interface UpdateVideoMetadataRequest {
 interface GetVideoMetadatasOfUserRequest {
     userId: string;
 }
+
+interface GetVideoMetadataByIdRequest {
+    id: string;
+}
+
+interface SearchVideosByTitleRequest {
+    title: string;
+}
+
+interface SearchVideoByTitleResponse {
+    videoMetadatas: VideoMetadata[];
+}

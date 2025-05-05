@@ -12,6 +12,7 @@ body {
     margin: 0;
     box-sizing: border-box;
     overflow-x: hidden;
+    background-color: #000;
 }
 
 * {
@@ -25,6 +26,8 @@ body {
     overflow: hidden;
     line-clamp: 1;
 }
+
+// spin
 
 .tailspin-loading {
     --uib-size: 40px;
@@ -56,4 +59,24 @@ body {
     100% {
         transform: rotate(360deg);
     }
+}
+
+
+// custom scroll bar of body
+    
+body::-webkit-scrollbar {
+    width: 5px; /* width of the entire scrollbar */
+    height: 5px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #fff; /* color of the tracking area */
+}
+
+body::-webkit-scrollbar-thumb {
+    background: #000; /* color of the scroll thumb */
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #210be7; /* color of the scroll thumb on hover */
 }

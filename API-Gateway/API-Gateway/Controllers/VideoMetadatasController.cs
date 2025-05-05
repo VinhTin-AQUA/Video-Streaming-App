@@ -38,5 +38,19 @@ namespace API_Gateway.Controllers
             var r = await videoMetadataClient.GetVideoMetadatasOfUser(userId);
             return Ok(r);
         }
+
+        [HttpGet("get-videometadata-by-id/{videoId}")]
+        public async Task<IActionResult> GetAllVideoMetadataById(string videoId)
+        {
+            var r = await videoMetadataClient.GetVideoMetadataById(videoId);
+            return Ok(r);
+        }
+
+        [HttpGet("search-videos-by-title")]
+        public async Task<IActionResult> SearchVideos([FromQuery]string? title)
+        {
+            var r = await videoMetadataClient.SearchVideos(title ?? "");
+            return Ok(r);
+        }
     }
 }

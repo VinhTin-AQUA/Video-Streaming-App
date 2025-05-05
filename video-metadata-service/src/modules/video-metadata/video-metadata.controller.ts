@@ -17,7 +17,7 @@ export class VideoMetadataController {
         const r = await this.videoMetadataService.getAllMetadata();
         return r;
     }
-    
+
     @GrpcMethod('VideoMetadataGRPC', 'UpdateVideoMetadata')
     async updateVideoMetadata(request: UpdateVideoMetadataRequest) {
         const r = await this.videoMetadataService.updateVideoMetadata(request);
@@ -26,7 +26,20 @@ export class VideoMetadataController {
 
     @GrpcMethod('VideoMetadataGRPC', 'GetVideoMetadatasOfUser')
     async getVideoMetadatasOfUser(request: GetVideoMetadatasOfUserRequest) {
-        const r = await this.videoMetadataService.getVideoMetadatasOfUser(request);
+        const r =
+            await this.videoMetadataService.getVideoMetadatasOfUser(request);
+        return r;
+    }
+
+    @GrpcMethod('VideoMetadataGRPC', 'GetVideoMetadataById')
+    async getVideoMetadataById(request: GetVideoMetadataByIdRequest) {
+        const r = await this.videoMetadataService.getVideoMetadataById(request);
+        return r;
+    }
+
+    @GrpcMethod('VideoMetadataGRPC', 'SearchVideosByTitle')
+    async searchVideosByTitle(request: SearchVideosByTitleRequest) {
+        const r = await this.videoMetadataService.searchVideos(request);
         return r;
     }
 }
