@@ -2,21 +2,31 @@ interface Empty {}
 
 interface UserInterface {
     id: string;
-    fulleName: string;
+    fullName: string;
     email: string;
-    avatartUrl: string;
+    avatarUrl: string;
 }
 
 interface AddUserRequest {
     id: string;
-    fulleName: string;
+    fullName: string;
     email: string;
-    avatartUrl: string;
+    avatarUrl: string;
 }
 
 interface UpdateUserRequest {
     id: string;
-    fulleName: string;
-    email: string;
-    avatartUrl: string;
+    fullName: string;
+}
+
+interface GetUserByIdRequest {
+    userId: string;
+}
+
+interface InitUserAvatarUploadRequest {
+    userId: string;
+}
+
+interface InitUserAvatarUploadResponse {
+    userAvatarUploadUrl: string;
 }

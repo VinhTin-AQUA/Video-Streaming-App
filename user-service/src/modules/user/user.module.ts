@@ -4,6 +4,7 @@ import { UserController } from './user.controller';
 import { UserRepository } from './repositories/user.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './entities/user.entity';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { User, UserSchema } from './entities/user.entity';
                 discriminators: [],
             },
         ]),
+        MinioModule,
     ],
     controllers: [UserController],
     providers: [UserService, UserRepository],

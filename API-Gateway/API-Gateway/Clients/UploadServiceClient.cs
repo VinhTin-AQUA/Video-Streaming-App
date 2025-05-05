@@ -55,7 +55,7 @@ namespace API_Gateway.Clients
             return new()
             {
                 VideoId = response.VideoId,
-                status = response.Status,
+                Status = response.Status,
             };
         }
     }

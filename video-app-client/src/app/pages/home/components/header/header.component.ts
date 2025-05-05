@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ClickOutsideDirective } from '../../../../common/directives/click-outside.directive';
 import {
     trigger,
@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/auth.service';
 import { FormsModule } from '@angular/forms';
 import { VideoSearchService } from '../../video-search.service';
+import { UserStore } from '../../../user/stores/user.store';
 
 export const slideDownAnimation = trigger('slideDown', [
     transition(':enter', [
@@ -50,6 +51,7 @@ export const slideDownAnimation = trigger('slideDown', [
 export class HeaderComponent {
     menuOpen = false;
     searchString: string = '';
+    userStore = inject(UserStore);
 
     constructor(
         private router: Router,

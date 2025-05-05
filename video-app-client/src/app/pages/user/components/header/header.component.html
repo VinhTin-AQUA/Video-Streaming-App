@@ -42,8 +42,8 @@
                 (click)="toggleMenu()"
                 class="flex items-center space-x-2 text-white px-3 py-1 rounded transition hover:bg-rose-100 hover:text-rose-700"
             >
-                <img src="logo.jpg" alt="Avatar" class="h-8 w-8 rounded-full" />
-                <span class="font-medium">Nguyễn Văn A</span>
+                <img [src]="userStore.avatarUrl()" alt="Avatar" class="h-8 w-8 rounded-full" />
+                <span class="font-medium">{{ userStore.fullName() }}</span>
             </button>
 
             @if(menuOpen) {

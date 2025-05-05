@@ -3,13 +3,20 @@ import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 import { UserRepository } from './repositories/user.repository';
 import { GrpcStatusCode } from 'src/common/exception/grpc-status-code';
+import { MinioService } from '../minio/minio.service';
+import { USER_AVATAR_BUCKET } from 'src/common/const/minIO.contants';
 
 @Injectable()
 export class UserService {
-    constructor(private readonly userRepo: UserRepository) {}
+    constructor(
+        private readonly userRepo: UserRepository,
+        private minioService: MinioService,
+    ) {}
 
-    async addUser(model: AddUserRequest): Promise<UserInterface> {
-        const userExists = await this.userRepo.findOne({ email: model.email });
+    async addUser(request: AddUserRequest): Promise<UserInterface> {
+        const userExists = await this.userRepo.findOne({
+            email: request.email,
+        });
 
         if (userExists) {
             throw new RpcException({
@@ -19,9 +26,10 @@ export class UserService {
             });
         }
         const r = await this.userRepo.add({
-            ...model,
-            _id: new Types.ObjectId(model.id),
-            avatarUrl: 'https://i.pinimg.com/736x/4c/2f/4c/4c2f4c74905d199957af7ee23489a9db.jpg'
+            ...request,
+            _id: new Types.ObjectId(request.id),
+            avatarUrl:
+                'https://i.pinimg.com/736x/4c/2f/4c/4c2f4c74905d199957af7ee23489a9db.jpg',
         });
         if (!r) {
             throw new RpcException({
@@ -32,30 +40,56 @@ export class UserService {
 
         return {
             id: r._id.toString(),
-            avatartUrl: '',
+            avatarUrl: '',
             email: r.email,
-            fulleName: r.fullName,
+            fullName: r.fullName,
         };
     }
 
-    async updateUser(model: UpdateUserRequest): Promise<UserInterface> {
+    async updateUser(request: UpdateUserRequest): Promise<UserInterface> {
         const r = await this.userRepo.findOneAndUpdate(
-            { _id: model.id },
-            model,
+            { _id: request.id },
+            request,
         );
 
         if (!r) {
             throw new RpcException({
                 code: GrpcStatusCode.INVALID_ARGUMENT,
-                message: 'Người dùng không tìm thấy',
+                message: 'User not found',
             });
         }
 
         return {
             id: r._id.toString(),
-            avatartUrl: r.avatarUrl,
+            avatarUrl: r.avatarUrl,
             email: r.email,
-            fulleName: r.fullName,
+            fullName: r.fullName,
+        };
+    }
+
+    async getUserById(request: GetUserByIdRequest) {
+        const r = await this.userRepo.findOne({
+            _id: request.userId,
+        });
+
+        if (!r) {
+            throw new RpcException({
+                code: GrpcStatusCode.NOT_FOUND,
+                message: 'User not found',
+            });
+        }
+        r.avatarUrl = await this.minioService.genGetPresignedUrl(USER_AVATAR_BUCKET, r._id.toString() + '.jpg');
+
+        return r;
+    }
+
+    async initUpdateUserAvatar(request: InitUserAvatarUploadRequest): Promise<InitUserAvatarUploadResponse> {
+        const avatarUploadUrl = await this.minioService.getPutPresignedUrl(
+            USER_AVATAR_BUCKET,
+            `${request.userId}.jpg`,
+        );
+        return {
+            userAvatarUploadUrl: avatarUploadUrl
         };
     }
 }

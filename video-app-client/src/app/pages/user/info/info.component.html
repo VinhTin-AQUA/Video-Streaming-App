@@ -6,15 +6,16 @@
         <!-- Avatar with Change Button -->
         <div class="relative w-24 h-24">
             <img
-                [src]="user.avatarUrl"
+                [src]="userStore.avatarUrl()"
                 alt="Avatar"
                 class="w-24 h-24 rounded-full shadow-md object-cover"
             />
 
             <!-- Change Button -->
             <button
-                class="absolute bottom-0 right-0 bg-gray-500/60 text-white p-1.5 rounded-full text-xs hover:bg-gray-700 shadow-md transition"
-                title="Thay ảnh"
+                (click)="openAvatarModal(true)"
+                class="absolute bottom-0 right-0 bg-gray-500/60 text-white p-1.5 rounded-full text-xs hover:bg-gray-700 shadow-md transition cursor-pointer"
+                title="update avatar"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +36,7 @@
 
         <div class="text-white">
             <div class="flex items-center space-x-2">
-                <h2 class="text-2xl font-bold">{{ user.fullName }}</h2>
+                <h2 class="text-2xl font-bold">{{ userStore.fullName() }}</h2>
                 <!-- Edit button -->
                 <button
                     (click)="showEditModal = true"
@@ -58,7 +59,7 @@
                     </svg>
                 </button>
             </div>
-            <p class="text-gray-600">{{ user.email }}</p>
+            <p class="text-gray-600">{{ userStore.email() }}</p>
         </div>
     </div>
 
@@ -130,34 +131,65 @@
 @if(showEditModal) {
 <div class="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md relative">
-        <h3 class="text-xl font-semibold mb-4">Chỉnh sửa thông tin</h3>
+        <h3 class="text-xl font-semibold mb-4">Update your profile</h3>
 
-        <label class="block mb-2 font-medium">Họ tên</label>
+        <label class="block mb-2 font-medium">FullName</label>
         <input
             [(ngModel)]="editFullName"
             type="text"
             class="w-full p-2 border border-gray-300 rounded-md mb-4"
         />
-
-        <label class="block mb-2 font-medium">Email</label>
-        <input
-            [(ngModel)]="editEmail"
-            type="email"
-            class="w-full p-2 border border-gray-300 rounded-md mb-4"
-        />
-
         <div class="flex justify-end space-x-2">
             <button
                 class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 (click)="showEditModal = false"
             >
-                Hủy
+                Cancel
             </button>
             <button
                 class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                (click)="saveChanges()"
+                (click)="updateProfile()"
             >
-                Lưu
+                Save
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Chọn Ảnh Avatar -->
+@if(showAvatarModal) {
+<div
+    class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+>
+    <div class="bg-white rounded-2xl shadow-lg w-96 p-6 relative">
+        <h2 class="text-lg font-semibold mb-4">Chọn ảnh đại diện</h2>
+
+        <img
+            [src]="selectedImageUrl"
+            alt="Preview"
+            class="mx-auto w-24 h-24 rounded-full object-cover border shadow"
+        />
+
+        <input
+            type="file"
+            (change)="onAvatarSelected($event)"
+            accept="image/*"
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+
+        <div class="flex justify-end gap-2 mt-6">
+            <button
+                (click)="openAvatarModal(false)"
+                class="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+            >
+                Cancel
+            </button>
+            <button
+                (click)="updateAvatar()"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            >
+                lưu
             </button>
         </div>
     </div>

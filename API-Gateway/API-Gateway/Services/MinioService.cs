@@ -28,6 +28,13 @@ namespace API_Gateway.Services
             {
                 await minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(MinIOContants.ASSET_BUCKET_NAME));
             }
+
+
+            bool userAvatarFound = await minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(MinIOContants.USER_AVATAR_BUCKET));
+            if (!userAvatarFound)
+            {
+                await minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(MinIOContants.USER_AVATAR_BUCKET));
+            }
         }
     }
 }

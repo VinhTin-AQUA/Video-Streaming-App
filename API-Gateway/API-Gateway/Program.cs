@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Minio;
 using StreamingService;
 using System.Text;
+using User;
 using VideoUploadService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,11 +68,16 @@ builder.Services.AddGrpcClient<VideoUploadGrpc.VideoUploadGrpcClient>(options =>
     options.Address = new Uri(builder.Configuration["VideoMetadataService:Url"]!);
 });
 
+builder.Services.AddGrpcClient<UserGRPC.UserGRPCClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["UserService:Url"]!);
+});
 
 builder.Services.AddSingleton<VideoStreamingClient>();
 builder.Services.AddSingleton<AuthServiceClient>();
 builder.Services.AddSingleton<UploadServiceClient>();
 builder.Services.AddSingleton<VideoMetadataClient>();
+builder.Services.AddSingleton<UserServiceClient>();
 
 #endregion
 

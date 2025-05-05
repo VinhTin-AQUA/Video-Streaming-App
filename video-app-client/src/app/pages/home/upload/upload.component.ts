@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UploadService } from '../upload.service';
+import { UploadService } from '../video-upload.service';
 import { VideoInfor } from '../dtos/video-info.dto';
 import { concatMap, switchMap } from 'rxjs';
 import { CompleteUpload } from '../dtos/complete-upload.dto';
