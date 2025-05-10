@@ -10,24 +10,16 @@ using VideoUploadService.Common.Contants;
 
 namespace VideoUploadService.Services
 {
-    public class MinioService
+    public class InternalMinioService
     {
         private readonly IMinioClient minioClient;
 
-        public MinioService(IMinioClient minioClient)
+        public InternalMinioService(IConfiguration configuration)
         {
-            this.minioClient = minioClient;
-        }
-
-        public async Task<string> GenPutPresignedUrl(string bucketName, string objectName)
-        {
-            var args = new PresignedPutObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectName)
-                .WithExpiry(3600); // 1 hour expiry
-            string signedUrl = await minioClient.PresignedPutObjectAsync(args);
-
-            return signedUrl;
+            this.minioClient = new MinioClient()
+                  .WithEndpoint(configuration["Minio:InternalEndpoint"])
+                  .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+                  .Build();
         }
 
         public async Task<bool> VerifyChunks(string userId, string uploadId, List<string> expectedChunks, string bucketName)

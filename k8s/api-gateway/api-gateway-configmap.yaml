@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+data:
+  appsettings.json: |
+    {
+        "Logging": {
+            "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+            }
+        },
+        "AllowedHosts": "*",
+        "AuthService": {
+            "Url": "http://auth-service:80"
+        },
+        "StreamingService": {
+            "Url": "http://streaming-service:80"
+        },
+        "TranscodingService": {
+            "Url": "http://transcoding-service:80"
+        },
+        "VideoMetadataService": {
+            "Url": "http://videometadata-service:80"
+        },
+        "VideoUploadService": {
+            "Url": "http://videoupload-service:80"
+        },
+        "UserService": {
+            "Url": "http://user-service:80"
+        },
+        "JWT": {
+            "Key": "37F8QYv58OsIZCcPKDdmXSq9nREt4uB8",
+            "Issuer": "http://localhost:5246",
+            "ValidAudience": "http://localhost:5246"
+        },
+        "Kafka": {
+            "BootstrapServers": "kafka:9092",
+            "NotificationVideoStatusGroupId": "notification-video-status-consumer"
+        },
+        "Minio": {
+            "InternalEndpoint": "minio:9000",
+            "ExternalEndpoint": "minio.video-streaming.com",
+            "AccessKey": "L6kAAtB9vgRNXr4ICDzG",
+            "SecretKey": "BHiP96IV5q83yIbofU1MS4tSDYVGHDUkeY31GfIg"
+        }
+    }
+
+
+

@@ -44,6 +44,6 @@ async function bootstrap() {
 
     await app.listen();
     await kafkaMicroservice.listen();
-    console.log('Product Service is running, port: 3001');
+    console.log('Auth Service is running, port: 3001');
 }
 bootstrap();

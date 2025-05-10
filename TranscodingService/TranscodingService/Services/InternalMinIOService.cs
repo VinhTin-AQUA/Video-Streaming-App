@@ -3,14 +3,17 @@ using Minio.DataModel.Args;
 
 namespace TranscodingService.Services
 {
-    public class MinIOService
+    public class InternalMinIOService
     {
         private readonly IMinioClient minioClient;
         private readonly IWebHostEnvironment webHostEnvironment;
 
-        public MinIOService(IMinioClient minioClient, IWebHostEnvironment webHostEnvironment)
+        public InternalMinIOService(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
-            this.minioClient = minioClient;
+            this.minioClient = new MinioClient()
+               .WithEndpoint(configuration["Minio:InternalEndpoint"])
+               .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+               .Build();
             this.webHostEnvironment = webHostEnvironment;
         }
 
@@ -48,16 +51,6 @@ namespace TranscodingService.Services
 
                 await minioClient.PutObjectAsync(args);
             }
-        }
-
-        public async Task<string> GenGetPresignedUrl(string bucketName, string objectName)
-        {
-            var args = new PresignedGetObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectName)
-                .WithExpiry(3600); // 1 hour expiry
-            string signedUrl = await minioClient.PresignedGetObjectAsync(args);
-            return signedUrl;
         }
 
         private string GetMimeType(string filePath)

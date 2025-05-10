@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+data:
+  JWT_ACCESS_TOKEN_SECRET: 37F8QYv58OsIZCcPKDdmXSq9nREt4uB8
+  JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30000000"
+  JWT_ISSUER: http://localhost:5246
+  JWT_VALIDAUDIENCE: http://localhost:5246
+  EMAIL_ADDRESS: ktrandang291@gmail.com
+  EMAILL_APP_PASSWORD: zgskagejmptbliro # opcy csmn hvwp gjmk
+  EMAIL_HOST: smtp.gmail.com
+  EMAIL_PORT: "587"
+  KAFKA_URI: kafka:9092
+  KAFKA_AUTH_GROUP_ID: auth-service-consumer

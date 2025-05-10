@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-config
+data:
+  KAFKA_URI: kafka:9092
+  KAFKA_USER_GROUP_ID: user-management-consumer
+
+  MINIO_ACCESSKEY: L6kAAtB9vgRNXr4ICDzG
+  MINIO_SECRETKEY: BHiP96IV5q83yIbofU1MS4tSDYVGHDUkeY31GfIg
+  MINIO_PROTOCOL: http
+  INTERNAL_MINIO_ENDPOINT: minio
+  INTERNAL_MINIO_PORT: "9000"
+  EXTERNAL_MINIO_ENDPOINT: minio.video-streaming.com
+  EXTERNAL_MINIO_PORT: "80"

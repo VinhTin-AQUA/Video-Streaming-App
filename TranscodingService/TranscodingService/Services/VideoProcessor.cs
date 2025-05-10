@@ -9,18 +9,21 @@ namespace TranscodingService.Services
 {
     public class VideoProcessor
     {
-        private readonly MinIOService minIOService;
+        private readonly InternalMinIOService internalMinIOService;
+        private readonly ExternalMinIOService externalMinIOService;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly VideoMetadataClientService videoMetadataClientService;
         private readonly KafkaProducerService kafkaProducerService;
 
-        public VideoProcessor(MinIOService minIOService,
+        public VideoProcessor(InternalMinIOService minIOService,
+            ExternalMinIOService externalMinIOService,
             IWebHostEnvironment webHostEnvironment,
             VideoMetadataClientService videoUploadClientService,
             KafkaProducerService kafkaProducerService
             )
         {
-            this.minIOService = minIOService;
+            this.internalMinIOService = minIOService;
+            this.externalMinIOService = externalMinIOService;
             this.webHostEnvironment = webHostEnvironment;
             this.videoMetadataClientService = videoUploadClientService;
             this.kafkaProducerService = kafkaProducerService;
@@ -35,7 +38,7 @@ namespace TranscodingService.Services
 
             #region create temp folder
 
-            var inputPath = await minIOService.DownloadVideo(videoMetadataMessage.UserId, 
+            var inputPath = await internalMinIOService.DownloadVideo(videoMetadataMessage.UserId, 
                                                             videoMetadataMessage.VideoId, 
                                                             videoMetadataMessage.Title, 
                                                             MinIOContants.RAW_VIDEOS_BUCKET_NAME);
@@ -117,7 +120,7 @@ namespace TranscodingService.Services
 
             #endregion
 
-            await minIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.UserId, videoMetadataMessage.VideoId);
+            await internalMinIOService.UploadDirectory(outputDir, MinIOContants.RAW_VIDEOS_BUCKET_NAME, videoMetadataMessage.UserId, videoMetadataMessage.VideoId);
             await videoMetadataClientService.UpdateVideoMetadat(
                 new Videometadata.UpdateVideoMetadataRequest
                 {
@@ -127,7 +130,7 @@ namespace TranscodingService.Services
                 }
             );
 
-            var thumbnailPresignUrl = await minIOService.GenGetPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, $"{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/thumbnail.jpg");
+            var thumbnailPresignUrl = await externalMinIOService.GenGetPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, $"{videoMetadataMessage.UserId}/{videoMetadataMessage.VideoId}/thumbnail.jpg");
             var videoUpdate = new
             {
                 UserId = $"video_status_update_{videoMetadataMessage.UserId}",

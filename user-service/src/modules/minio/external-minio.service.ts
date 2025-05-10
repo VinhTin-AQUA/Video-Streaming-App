@@ -3,15 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { Client } from 'minio';
 
 @Injectable()
-export class MinioService {
+export class ExternalMinioService {
     private minioClient: Client;
-    private readonly videoBucketName = 'videos';
 
     constructor(private configService: ConfigService) {
         this.minioClient = new Client({
-            endPoint: this.configService.get<string>('MINIO_ENDPOINT', ''),
+            endPoint: this.configService.get<string>(
+                'EXTERNAL_MINIO_ENDPOINT',
+                'localhost',
+            ),
             port: Number.parseInt(
-                this.configService.get<string>('MINIO_PORT', ''),
+                this.configService.get<string>('EXTERNAL_MINIO_PORT', '9000'),
             ),
             useSSL:
                 this.configService.get<string>('MINIO_PROTOCOL') === 'https',

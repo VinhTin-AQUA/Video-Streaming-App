@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: streaming-config
+data:
+  appsettings.json: |
+    {
+        "Logging": {
+            "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+            }
+        },
+        "AllowedHosts": "*",
+        "Kestrel": {
+            "EndpointDefaults": {
+                "Protocols": "Http2"
+            }
+        },
+        "Minio": {
+            "InternalEndpoint": "minio:9000",
+            "AccessKey": "L6kAAtB9vgRNXr4ICDzG",
+            "SecretKey": "BHiP96IV5q83yIbofU1MS4tSDYVGHDUkeY31GfIg"
+        }
+    }
+

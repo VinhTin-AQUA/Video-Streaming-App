@@ -27,7 +27,7 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
     return client;
 });
 
-builder.Services.AddSingleton<MinioService>();
+builder.Services.AddSingleton<InternalMinioService>();
 
 #endregion
 

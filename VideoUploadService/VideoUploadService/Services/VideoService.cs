@@ -11,15 +11,18 @@ namespace VideoUploadService.Services
 {
     public class VideoService : VideoUploadGrpc.VideoUploadGrpcBase
     {
-        private readonly MinioService minio;
+        private readonly InternalMinioService internalMinio;
+        private readonly ExternalMinIOService externalMinio;
         private readonly KafkaProducerService kafkaProducerService;
         private readonly VideoMetadataClient videoMetadataClient;
 
-        public VideoService(MinioService minio,
+        public VideoService(InternalMinioService internalMinio,
+            ExternalMinIOService externalMinio,
             KafkaProducerService kafkaProducerService,
             VideoMetadataClient videoMetadataClient)
         {
-            this.minio = minio;
+            this.internalMinio = internalMinio;
+            this.externalMinio = externalMinio;
             this.kafkaProducerService = kafkaProducerService;
             this.videoMetadataClient = videoMetadataClient;
         }
@@ -42,7 +45,7 @@ namespace VideoUploadService.Services
             for (int i = 0; i < CalculateChunkCount(request.Size); i++)
             {
                 string objectName = $"{metadata.UserId}/{metadata.Id}/chunk-{i}";
-                chunkUrls.Add(await minio.GenPutPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, objectName));
+                chunkUrls.Add(await externalMinio.GenPutPresignedUrl(MinIOContants.RAW_VIDEOS_BUCKET_NAME, objectName));
             }
 
             return new InitUploadResponse
@@ -55,7 +58,7 @@ namespace VideoUploadService.Services
         public override async Task<CompleteUploadResponse> CompleteUpload(CompleteUploadRequest request, ServerCallContext context)
         {
             // verify chunks in MinIO
-            bool allChunksUploaded = await minio.VerifyChunks(
+            bool allChunksUploaded = await internalMinio.VerifyChunks(
                 request.UserId,
                 request.VideoId,
                 request.ChunkChecksums.Select(chunk => chunk).ToList(),
@@ -88,7 +91,7 @@ namespace VideoUploadService.Services
             //await kafkaProducerService.SendMessageAsync(KafkaContants.VIDEO_STATUS_UPDATED, videoUpdate);
 
             // hợp nhất các chunks thành file gốc
-            await minio.ComebineChunks(request.UserId, request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Title);
+            await internalMinio.ComebineChunks(request.UserId, request.VideoId, MinIOContants.RAW_VIDEOS_BUCKET_NAME, metadata.Title);
 
             // Publish to Kafka để xử lý encoding
             var message = new

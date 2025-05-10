@@ -31,18 +31,8 @@ builder.Services.AddSwaggerGen();
 
 #region minio
 
-builder.Services.AddSingleton<IMinioClient>(sp =>
-{
-    var config = builder.Configuration.GetSection("Minio");
-    var client = new MinioClient()
-                .WithEndpoint(config["Endpoint"])
-                .WithCredentials(config["AccessKey"], config["SecretKey"])
-                .Build();
-
-    return client;
-});
-
-builder.Services.AddSingleton<MinioService>();
+builder.Services.AddSingleton<InternalMinioService>();
+builder.Services.AddSingleton<ExternalMinIOService>();
 
 #endregion
 
@@ -163,7 +153,7 @@ app.MapHub<UpdateVideoHup>("/hub/video-update-hub").RequireCors("CorsPolicy"); ;
 // Đảm bảo bucket tồn tại
 using (var scope = app.Services.CreateScope())
 {
-    var minioService = scope.ServiceProvider.GetRequiredService<MinioService>();
+    var minioService = scope.ServiceProvider.GetRequiredService<InternalMinioService>();
     await minioService.Init();
 
     var kafakProducerService = scope.ServiceProvider.GetRequiredService<KafkaProducerService>();

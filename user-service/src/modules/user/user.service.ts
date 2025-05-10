@@ -3,14 +3,14 @@ import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 import { UserRepository } from './repositories/user.repository';
 import { GrpcStatusCode } from 'src/common/exception/grpc-status-code';
-import { MinioService } from '../minio/minio.service';
 import { USER_AVATAR_BUCKET } from 'src/common/const/minIO.contants';
+import { ExternalMinioService } from '../minio/external-minio.service';
 
 @Injectable()
 export class UserService {
     constructor(
         private readonly userRepo: UserRepository,
-        private minioService: MinioService,
+        private externalMinioService: ExternalMinioService,
     ) {}
 
     async addUser(request: AddUserRequest): Promise<UserInterface> {
@@ -78,13 +78,13 @@ export class UserService {
                 message: 'User not found',
             });
         }
-        r.avatarUrl = await this.minioService.genGetPresignedUrl(USER_AVATAR_BUCKET, r._id.toString() + '.jpg');
+        r.avatarUrl = await this.externalMinioService.genGetPresignedUrl(USER_AVATAR_BUCKET, r._id.toString() + '.jpg');
 
         return r;
     }
 
     async initUpdateUserAvatar(request: InitUserAvatarUploadRequest): Promise<InitUserAvatarUploadResponse> {
-        const avatarUploadUrl = await this.minioService.getPutPresignedUrl(
+        const avatarUploadUrl = await this.externalMinioService.getPutPresignedUrl(
             USER_AVATAR_BUCKET,
             `${request.userId}.jpg`,
         );

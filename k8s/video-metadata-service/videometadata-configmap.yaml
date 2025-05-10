@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: videometadata-config
+data:
+  MINIO_PROTOCOL: http
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_BASEURL: minio:9000
+  MINIO_ACCESSKEY: L6kAAtB9vgRNXr4ICDzG
+  MINIO_SECRETKEY: BHiP96IV5q83yIbofU1MS4tSDYVGHDUkeY31GfIg

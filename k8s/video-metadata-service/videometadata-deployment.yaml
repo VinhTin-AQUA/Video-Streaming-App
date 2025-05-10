@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: videometadata-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: videometadata-service
+  template:
+    metadata:
+      labels:
+        app: videometadata-service
+    spec:
+      containers:
+      - name: videometadata-service
+        image: vinhtin/video-metadata-service:latest
+        ports:
+        - containerPort: 3002
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongodb-videometadata-service-uri
+        envFrom:
+          - configMapRef:
+              name: videometadata-config

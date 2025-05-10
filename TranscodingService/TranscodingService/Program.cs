@@ -13,17 +13,8 @@ builder.Services.AddGrpc();
 
 #region minio
 
-builder.Services.AddSingleton<IMinioClient>(sp =>
-{
-    var config = builder.Configuration.GetSection("Minio");
-    var client = new MinioClient()
-                .WithEndpoint(config["Endpoint"])
-                .WithCredentials(config["AccessKey"], config["SecretKey"])
-                .Build();
-
-    return client;
-});
-builder.Services.AddSingleton<MinIOService>();
+builder.Services.AddSingleton<InternalMinIOService>();
+builder.Services.AddSingleton<ExternalMinIOService>();
 
 #endregion
 

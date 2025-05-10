@@ -4,16 +4,18 @@ using Minio.DataModel.Args;
 
 namespace API_Gateway.Services
 {
-    public class MinioService
+    public class InternalMinioService
     {
 
         private readonly IMinioClient minioClient;
 
-        public MinioService(IMinioClient minioClient)
+        public InternalMinioService(IConfiguration configuration)
         {
-            this.minioClient = minioClient;
+            this.minioClient = new MinioClient()
+                 .WithEndpoint(configuration["Minio:InternalEndpoint"])
+                 .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+                 .Build();
         }
-
 
         public async Task Init()
         {

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcoding-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transcoding-service
+  template:
+    metadata:
+      labels:
+        app: transcoding-service
+    spec:
+      containers:
+      - name: transcoding-service
+        image: vinhtin/transcoding-service:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name: transcoding-volume
+            mountPath: /app/appsettings.json
+            subPath: appsettings.json
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: transcoding-secrets
+              key: ConnectionStrings__DefaultConnection
+      volumes:
+        - name: transcoding-volume
+          configMap:
+            name: transcoding-config
+      

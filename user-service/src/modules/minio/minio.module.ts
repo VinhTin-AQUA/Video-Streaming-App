@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MinioService } from './minio.service';
+import { ExternalMinioService } from './external-minio.service';
+import { InternalMinioService } from './internal-minio.service';
+
+
 @Module({
-    providers: [MinioService],
-    exports: [MinioService],
+    providers: [InternalMinioService, ExternalMinioService],
+    exports: [InternalMinioService, ExternalMinioService],
 })
 export class MinioModule {}

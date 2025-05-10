@@ -1,0 +1,54 @@
+kubectl apply -f k8s/mongo/mongo-pvc.yaml
+kubectl apply -f k8s/mongo/mongo-secret.yaml
+kubectl apply -f k8s/mongo/mongo-deployment.yaml
+kubectl apply -f k8s/mongo/mongo-service.yaml
+
+kubectl apply -f k8s/minio/minio-secret.yaml
+kubectl apply -f k8s/minio/minio-pvc.yaml
+kubectl apply -f k8s/minio/minio-deployment.yaml
+kubectl apply -f k8s/minio/minio-service.yaml
+
+kubectl apply -f k8s/kafka/zookeeper-headless.yaml
+kubectl apply -f k8s/kafka/zookeeper-statefulset.yaml
+kubectl apply -f k8s/kafka/kafka-configmap.yaml
+kubectl apply -f k8s/kafka/kafka-headless.yaml
+kubectl apply -f k8s/kafka/kafka-statefulset.yaml
+kubectl apply -f k8s/kafka/kafka-service.yaml
+
+kubectl apply -f k8s/auth-service/auth-configmap.yaml
+kubectl apply -f k8s/auth-service/auth-deployment.yaml
+kubectl apply -f k8s/auth-service/auth-service.yaml
+
+kubectl apply -f k8s/user-service/user-configmap.yaml
+kubectl apply -f k8s/user-service/user-deployment.yaml
+kubectl apply -f k8s/user-service/user-service.yaml
+
+kubectl apply -f k8s/video-metadata-service/videometadata-configmap.yaml
+kubectl apply -f k8s/video-metadata-service/videometadata-deployment.yaml
+kubectl apply -f k8s/video-metadata-service/videometadata-service.yaml
+
+kubectl apply -f k8s/videoupload-service/videoupload-configmap.yaml
+kubectl apply -f k8s/videoupload-service/videoupload-secret.yaml
+kubectl apply -f k8s/videoupload-service/videoupload-deployment.yaml
+kubectl apply -f k8s/videoupload-service/videoupload-service.yaml
+
+kubectl apply -f k8s/api-gateway/api-gateway-configmap.yaml
+kubectl apply -f k8s/api-gateway/api-gateway-secret.yaml
+kubectl apply -f k8s/api-gateway/api-gateway-deployment.yaml
+kubectl apply -f k8s/api-gateway/api-gateway-service.yaml
+
+kubectl apply -f k8s/transcoding-service/transcoding-configmap.yaml
+kubectl apply -f k8s/transcoding-service/transcoding-secret.yaml
+kubectl apply -f k8s/transcoding-service/transcoding-deployment.yaml
+kubectl apply -f k8s/transcoding-service/transcoding-service.yaml
+
+kubectl apply -f k8s/streaming-service/streaming-configmap.yaml
+kubectl apply -f k8s/streaming-service/streaming-secret.yaml
+kubectl apply -f k8s/streaming-service/streaming-deployment.yaml
+kubectl apply -f k8s/streaming-service/streaming-service.yaml
+
+kubectl apply -f k8s/api-gateway/api-gateway-ingress.yaml
+kubectl apply -f k8s/api-gateway/api-gateway-minio-ingress.yaml
+
+kubectl port-forward svc/minio 9001:9001
+kubectl port-forward svc/mongodb 27018:27017

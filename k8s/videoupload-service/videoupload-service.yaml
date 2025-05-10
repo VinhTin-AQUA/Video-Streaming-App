@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: videoupload-service
+spec:
+  selector:
+    app: videoupload-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+    
